@@ -1,0 +1,13 @@
+{
+  "name": "GigaCortex",
+  "version": "1.0.0",
+  "description": "the ai chat assist",
+  "scripts": {
+    "start:server": "cd server && npm run start",
+    "start:app": "cd app && npm run start",
+    "start:app:reset": "cd app && npm run start -- --reset-cache",
+    "install:all": "cd app && npm install && cd ../server && npm install"
+  },
+  "author": "kunal lokhande",
+  "license": "ISC"
+}
