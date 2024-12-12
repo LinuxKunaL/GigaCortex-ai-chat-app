@@ -55,8 +55,8 @@ const Button: React.FC<Props> = ({
     },
     secondary: {
       backgroundColor: colors.dark,
-      borderColor: 'transparent',
-      borderWidth: 0.8,
+      borderColor: colors.sulu,
+      borderWidth: 1.5,
       opacity: disabled ? 0.7 : 1,
     },
     tertiary: {

@@ -1,6 +1,5 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
-import defaultProps from '../types/props';
 import globalStyles from '../styles/style';
 import typographyStyles from '../constants/typography';
 import colors from '../constants/colors';
@@ -11,10 +10,10 @@ import Button from '../components/interface/Button';
 import InputController from '../components/interface/InputController';
 import GoogleLogo from '../assets/svg/GoogleLogo';
 import fonts from '../constants/fonts';
-
+import defaultProps from '../types/props';
 type Props = defaultProps & {};
 
-const Login: React.FC<Props> = props => {
+const Register: React.FC<Props> = props => {
   const {
     control,
     handleSubmit,
@@ -32,19 +31,28 @@ const Login: React.FC<Props> = props => {
           <View style={styles.formView}>
             <Gap height={sizes.xxxl} />
             <Text style={[typographyStyles.h1, styles.titleText]}>
-              Login here
+              Create account
             </Text>
             <Text style={[typographyStyles.label, styles.subtitleText]}>
-              please enter your details to signin
+              please enter your details to create account
             </Text>
             <Gap height={sizes.xxl} />
             <View style={styles.width100}>
               <InputController
                 control={control}
+                name="name"
+                requiredMessage="Name is required"
+                invalidMassage="Name must be alphabetical"
+                placeholder="Enter your name"
+                pattern={/^[a-z A-Z]+$/}
+                errors={errors}
+              />
+              <InputController
+                control={control}
                 name="email"
                 requiredMessage="Email is required"
                 invalidMassage="Invalid email address"
-                placeholder="Enter your email"
+                placeholder="Enter you email"
                 pattern={/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/}
                 errors={errors}
               />
@@ -53,7 +61,17 @@ const Login: React.FC<Props> = props => {
                 name="password"
                 requiredMessage="Password is required"
                 invalidMassage="Password must be exactly 6 characters"
-                placeholder="Enter your password "
+                placeholder="Enter password "
+                isPassword={true}
+                pattern={/^\w{6}$/}
+                errors={errors}
+              />
+              <InputController
+                control={control}
+                name="passwordAgain"
+                requiredMessage="Password again is required"
+                invalidMassage="Password must be exactly 6 characters"
+                placeholder="Enter password again"
                 isPassword={true}
                 pattern={/^\w{6}$/}
                 errors={errors}
@@ -69,10 +87,10 @@ const Login: React.FC<Props> = props => {
             <Gap height={6} />
             <TouchableOpacity
               style={styles.width100}
-              onPress={() => props.navigation.navigate('register')}>
-              <Text style={[typographyStyles.label, styles.createAccountText]}>
-                Don’t have an account ?
-                <Text style={{color: colors.sulu}}> Create an account</Text>
+              onPress={() => props.navigation.navigate('login')}>
+              <Text style={[typographyStyles.label, styles.loginAccountText]}>
+                Already have an account ?
+                <Text style={{color: colors.sulu}}> login</Text>
               </Text>
             </TouchableOpacity>
           </View>
@@ -94,7 +112,7 @@ const Login: React.FC<Props> = props => {
   );
 };
 
-export default Login;
+export default Register;
 
 const styles = StyleSheet.create({
   layout: {
@@ -117,7 +135,7 @@ const styles = StyleSheet.create({
     gap: 5,
     alignItems: 'center',
   },
-  createAccountText: {
+  loginAccountText: {
     textAlign: 'left',
     color: colors.white,
     alignItems: 'center',
