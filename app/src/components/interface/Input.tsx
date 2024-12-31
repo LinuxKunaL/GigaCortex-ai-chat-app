@@ -1,4 +1,10 @@
-import {TextInput, StyleSheet, KeyboardTypeOptions} from 'react-native';
+import {
+  TextInput,
+  StyleSheet,
+  KeyboardTypeOptions,
+  ViewStyle,
+  StyleProp,
+} from 'react-native';
 import React from 'react';
 import colors from '../../constants/colors';
 import spaces from '../../constants/spaces';
@@ -13,13 +19,14 @@ type Props = {
   value?: string;
   defaultValue?: string;
   isPassword?: boolean;
+  style?: StyleProp<ViewStyle>;
 };
 
 const Input: React.FC<Props> = props => {
   return (
     <TextInput
       {...props}
-      style={styles.inputStyle}
+      style={[styles.inputStyle, props.style]}
       placeholderTextColor={colors.gray500}
       cursorColor={colors.sulu}
       secureTextEntry={props.isPassword}
@@ -36,7 +43,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 'auto',
     borderRadius: spaces.radius,
-    fontSize:sizes.sm,
+    fontSize: sizes.sm,
     color: colors.white,
     paddingLeft: 10,
     fontFamily: fonts.RubikRegular,

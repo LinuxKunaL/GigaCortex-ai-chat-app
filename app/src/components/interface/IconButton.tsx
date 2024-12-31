@@ -46,7 +46,7 @@ const IconButton: React.FC<Props> = ({
       backgroundColor: colors.sulu,
     },
     secondary: {
-      backgroundColor: colors.dark,
+      backgroundColor: colors.gray,
     },
     tertiary: {
       backgroundColor: colors.suluDark,
@@ -103,6 +103,8 @@ const styles = StyleSheet.create({
     borderRadius: spaces.radius,
     alignItems: 'center',
     justifyContent: 'center',
+    borderColor: colors.gray500,
+    borderWidth: 0.5,
   },
 });
 

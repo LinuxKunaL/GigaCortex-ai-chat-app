@@ -78,7 +78,7 @@ const Button: React.FC<Props> = ({
       padding: 7,
     },
     lg: {
-      padding: 10,
+      padding: 12,
     },
   };
 
@@ -86,7 +86,6 @@ const Button: React.FC<Props> = ({
     xs: {
       fontSize: sizes.xs,
     },
-
     sm: {
       fontSize: sizes.sm,
     },
@@ -122,9 +121,9 @@ const styles = StyleSheet.create({
   buttonText: {
     alignItems: 'center',
     justifyContent: 'center',
-    fontFamily: fonts.RubikMedium,
+    fontFamily: fonts.RubikSemibold,
     fontSize: sizes.sm,
-    color: colors.dark,
+    color: colors.gray,
     includeFontPadding: false,
   },
 });

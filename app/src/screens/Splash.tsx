@@ -32,7 +32,7 @@ const Splash: React.FC<Props> = props => {
     return () => {
       clearTimeout(nativeTimeout);
     };
-  }, [fadeAnim, scaleAnim,props.navigation]);
+  }, [fadeAnim, scaleAnim, props.navigation]);
 
   return (
     <View style={globalStyles.container}>

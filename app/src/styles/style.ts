@@ -27,6 +27,11 @@ const globalStyles = StyleSheet.create({
     backgroundColor: colors.dark,
     padding: spaces.padding,
   },
+  border:{
+    borderRadius:spaces.radius,
+    borderWidth:0.5,
+    borderColor:colors.gray500
+  }
 });
 
 export default globalStyles;
