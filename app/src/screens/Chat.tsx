@@ -88,10 +88,11 @@ const Chat: React.FC<Props> = props => {
       styles: styles.codeContainer,
       children: (returnType?: string) =>
         renderCodeBlock(
-          'java',
+          'python',
           'PY',
           `a = 5
   b = 3
+  kunal = 10/10
   sum = a + b
   print(sum)`,
           returnType,

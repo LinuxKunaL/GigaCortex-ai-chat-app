@@ -7,7 +7,7 @@ import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 
 const BottomNavigation: React.FC<BottomTabBarProps> = props => {
   const routesName = props.state.routeNames;
-  console.log(props);
+
 
   const activeTabIndex = props.state.index;
 

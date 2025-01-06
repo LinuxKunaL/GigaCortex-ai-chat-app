@@ -9,10 +9,16 @@ import Icon from '../../components/interface/Icon';
 import HorizontalLine from '../../components/interface/HorizontalLine';
 import spaces from '../../constants/spaces';
 import Button from '../../components/interface/Button';
+import PurchaseToken from '../../components/bottomSheets/PurchaseToken';
+import {RBSheetRef} from '../../types/rbSheetRef';
+import PurchaseHistory from '../../components/bottomSheets/PurchaseHistory';
 
 type Props = {};
 
 const Profile: React.FC<Props> = props => {
+  const REFPurchaseToken = React.useRef<RBSheetRef>(null);
+  const REFPurchaseTokenHistory = React.useRef<RBSheetRef>(null);
+
   const options = [
     {
       id: 1,
@@ -79,6 +85,7 @@ const Profile: React.FC<Props> = props => {
               variant="primary"
               size="md"
               fontSize="sm"
+              onPress={() => REFPurchaseToken.current?.open()}
               style={styles.tokensButtonWidth}>
               Buy
             </Button>
@@ -86,6 +93,7 @@ const Profile: React.FC<Props> = props => {
               variant="secondary"
               size="md"
               fontSize="sm"
+              onPress={() => REFPurchaseTokenHistory.current?.open()}
               style={styles.tokensButtonHistory}>
               <Text style={{color: colors.sulu}}>History</Text>
             </Button>
@@ -114,6 +122,8 @@ const Profile: React.FC<Props> = props => {
           ))}
         </View>
       </View>
+      <PurchaseToken ref={REFPurchaseToken} />
+      <PurchaseHistory ref={REFPurchaseTokenHistory} />
     </View>
   );
 };
