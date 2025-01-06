@@ -22,16 +22,21 @@ const globalStyles = StyleSheet.create({
     borderWidth: 1,
   },
   bottomSheetContainer: {
+    borderWidth: 0.5,
+    borderBottomWidth:0,
+    borderTopColor: colors.gray500,
+    borderLeftColor: colors.gray500,
+    borderRightColor: colors.gray500,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     backgroundColor: colors.dark,
     padding: spaces.padding,
   },
-  border:{
-    borderRadius:spaces.radius,
-    borderWidth:0.5,
-    borderColor:colors.gray500
-  }
+  border: {
+    borderRadius: spaces.radius,
+    borderWidth: 0.5,
+    borderColor: colors.gray500,
+  },
 });
 
 export default globalStyles;

@@ -12,12 +12,14 @@ import Button from '../../components/interface/Button';
 import PurchaseToken from '../../components/bottomSheets/PurchaseToken';
 import {RBSheetRef} from '../../types/rbSheetRef';
 import PurchaseHistory from '../../components/bottomSheets/PurchaseHistory';
+import ChangePassword from '../../components/bottomSheets/ChangePassword';
 
 type Props = {};
 
 const Profile: React.FC<Props> = props => {
   const REFPurchaseToken = React.useRef<RBSheetRef>(null);
   const REFPurchaseTokenHistory = React.useRef<RBSheetRef>(null);
+  const REFChangePassword = React.useRef<RBSheetRef>(null);
 
   const options = [
     {
@@ -61,9 +63,13 @@ const Profile: React.FC<Props> = props => {
           <View style={styles.profileTextView}>
             <Text style={styles.profileName}>kunal lokhande</Text>
             <Text style={styles.profileEmail}>kunallokhande774@gmail.com</Text>
-            <Text style={styles.profileChangePassword}>
-              Change Password <Icon name="pencil" color={colors.sulu} />
-            </Text>
+            <TouchableOpacity
+              onPress={() => REFChangePassword.current?.open()}
+              activeOpacity={0.7}>
+              <Text style={styles.profileChangePassword}>
+                Change Password <Icon name="pencil" color={colors.sulu} />
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         <Gap height={sizes.xs} />
@@ -124,6 +130,7 @@ const Profile: React.FC<Props> = props => {
       </View>
       <PurchaseToken ref={REFPurchaseToken} />
       <PurchaseHistory ref={REFPurchaseTokenHistory} />
+      <ChangePassword ref={REFChangePassword} />
     </View>
   );
 };
