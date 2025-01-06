@@ -13,6 +13,7 @@ import PurchaseToken from '../../components/bottomSheets/PurchaseToken';
 import {RBSheetRef} from '../../types/rbSheetRef';
 import PurchaseHistory from '../../components/bottomSheets/PurchaseHistory';
 import ChangePassword from '../../components/bottomSheets/ChangePassword';
+import TermsAndPolicy from '../../components/bottomSheets/TermsAndPrivacy';
 
 type Props = {};
 
@@ -20,6 +21,7 @@ const Profile: React.FC<Props> = props => {
   const REFPurchaseToken = React.useRef<RBSheetRef>(null);
   const REFPurchaseTokenHistory = React.useRef<RBSheetRef>(null);
   const REFChangePassword = React.useRef<RBSheetRef>(null);
+  const REFTermsAndPolicy = React.useRef<RBSheetRef>(null);
 
   const options = [
     {
@@ -27,14 +29,14 @@ const Profile: React.FC<Props> = props => {
       title: 'Privacy policy',
       icon: 'security',
       color: colors.gray500,
-      onPress: () => {},
+      onPress: () => REFTermsAndPolicy.current?.open(),
     },
     {
       id: 2,
       title: 'Term of service',
       icon: 'text-box-outline',
       color: colors.gray500,
-      onPress: () => {},
+      onPress: () => REFTermsAndPolicy.current?.open(),
     },
     {
       id: 3,
@@ -131,6 +133,7 @@ const Profile: React.FC<Props> = props => {
       <PurchaseToken ref={REFPurchaseToken} />
       <PurchaseHistory ref={REFPurchaseTokenHistory} />
       <ChangePassword ref={REFChangePassword} />
+      <TermsAndPolicy ref={REFTermsAndPolicy} />
     </View>
   );
 };

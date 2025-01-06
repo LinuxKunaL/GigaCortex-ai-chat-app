@@ -9,8 +9,8 @@ import globalStyles from '../../styles/style';
 import sizes from '../../constants/sizes';
 import Gap from '../interface/Gap';
 import InputController from '../interface/InputController';
-import {useForm} from 'react-hook-form';
 import Button from '../interface/Button';
+import {useForm} from 'react-hook-form';
 
 type Props = {
   ref: RBSheetRef;
@@ -30,7 +30,7 @@ const ChangePassword = React.forwardRef<RBSheetRef, Props>(
     return (
       <RawBottomSheet
         ref={ref}
-        height={350}
+        height={365}
         customStyles={{
           wrapper: {
             backgroundColor: 'rgba(0,0,0,0.5)',
