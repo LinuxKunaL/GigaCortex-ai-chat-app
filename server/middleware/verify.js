@@ -5,7 +5,11 @@ import MUser from "../database/model/user.js";
 const verify = (req, res, next) => {
   try {
     // skip auth route
-    if (req.path === "/api/auth/login" || req.path === "/api/auth/register") {
+    if (
+      req.path === "/api/auth/login" ||
+      req.path === "/api/auth/register" ||
+      req.path === "/api/chat/conversation"
+    ) {
       return next();
     }
 
@@ -24,7 +28,6 @@ const verify = (req, res, next) => {
     // verify token
     jwt.verify(token, config.jwt, async (err, decoded) => {
       if (err) {
-        
         return res.status(401).json({ error: "invalid jwt token" });
       }
       try {
@@ -34,7 +37,7 @@ const verify = (req, res, next) => {
         if (!user) return res.status(401).json({ error: "user not found" });
 
         req.user = user._id.toString();
-        
+
         next();
       } catch (error) {
         res.status(401).json({ error: "user not found" });

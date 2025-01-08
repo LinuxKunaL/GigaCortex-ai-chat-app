@@ -6,12 +6,14 @@ import authRouter from "./router/auth.js";
 import chatRouter from "./router/chat.js";
 import { connectDB } from "./database/connect.js";
 import verify from "./middleware/verify.js";
+import compression from "compression";
 
 const app = express();
 connectDB();
 
 app.use(express.json());
 app.use(cors());
+app.use(compression())
 app.use(verify)
 
 app.use("/api/auth", authRouter);
