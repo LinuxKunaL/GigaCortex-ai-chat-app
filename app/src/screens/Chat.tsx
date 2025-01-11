@@ -19,6 +19,7 @@ import CodeBlock from '../components/interface/CodeBlock';
 import defaultProps from '../types/props';
 import Markdown from 'react-native-markdown-display';
 import spaces from '../constants/spaces';
+import {io} from 'socket.io-client';
 
 type Props = defaultProps & {};
 type TElement = {
@@ -87,18 +88,16 @@ const Chat: React.FC<Props> = props => {
   ];
 
   useEffect(() => {
-    let index = 0;
-
-    const interval = setInterval(() => {
-      if (index < blocks.length) {
-        setMarkdownBlocks(prev => [...prev, blocks[index]]);
-        index++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 500);
-
-    return () => clearInterval(interval); // Cleanup on component unmount
+    // let index = 0;
+    // const interval = setInterval(() => {
+    //   if (index < blocks.length) {
+    //     setMarkdownBlocks(prev => [...prev, blocks[index]]);
+    //     index++;
+    //   } else {
+    //     clearInterval(interval);
+    //   }
+    // }, 500);
+    // return () => clearInterval(interval);
   }, []);
 
   const markdownStyle = {
@@ -135,6 +134,15 @@ const Chat: React.FC<Props> = props => {
     image: {
       borderRadius: spaces.radius,
     },
+  };
+
+  const fetchStreamWithAxios = async () => {
+    const url = 'http://192.168.0.133:3001';
+
+    const stream = io(url);
+    stream.on('connect', () => {
+      console.log('connected');
+    });
   };
 
   return (
@@ -197,6 +205,7 @@ const Chat: React.FC<Props> = props => {
                         iconSize={15}
                         color={colors.sulu}
                         // onPress={copyResponse}
+                        onPress={fetchStreamWithAxios}
                       />
                     </View>
                   </View>
