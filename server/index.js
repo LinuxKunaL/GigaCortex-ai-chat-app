@@ -1,4 +1,5 @@
 import express from "express";
+import http from "http";
 import config from "./config/index.js";
 import cors from "cors";
 import print from "./utils/console.js";
@@ -8,21 +9,15 @@ import { connectDB } from "./database/connect.js";
 import verify from "./middleware/verify.js";
 import compression from "compression";
 import { Server } from "socket.io";
-
-const s = new Server({}).listen(3001);
-
-s.on("connection", (socket) => {
-  print("Client Connected", "cyan");
-  socket.on("message", (message) => {
-    print(message, "gray");
-  });
-  socket.on("close", () => {
-    print("Client Disconnected", "cyan");
-  });
-});
+import Sockets from "./utils/socket.js";
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+const socket = new Sockets(io);
+
 connectDB();
+socket.start();
 
 app.use(express.json());
 app.use(cors());
@@ -41,6 +36,6 @@ app.get("/", (req, res) => {
   res.send("Hello from GigaCortex");
 });
 
-app.listen(config.port, () =>
+server.listen(config.port, () =>
   print(`Server running on port ${config.port}`, "cyan")
 );

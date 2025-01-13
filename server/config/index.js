@@ -4,6 +4,7 @@ dotenv.config();
 
 const config = {
   port: process.env.PORT,
+  socket_port: 3001,
   dbUrl: process.env.MONGODB_URL,
   jwt: process.env.JWT_SECRET,
   GeminiKey: process.env.GEMINI_KEY,

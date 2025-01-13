@@ -1,5 +1,12 @@
 // @ts-nocheck
-import {Image, StyleSheet, Text, View, ScrollView} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Keyboard,
+} from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {Fragment, ReactNode, useEffect, useState} from 'react';
 import globalStyles from '../styles/style';
@@ -20,17 +27,16 @@ import defaultProps from '../types/props';
 import Markdown from 'react-native-markdown-display';
 import spaces from '../constants/spaces';
 import {io} from 'socket.io-client';
+import useSocket from '../hooks/useSocket';
 
 type Props = defaultProps & {};
-type TElement = {
-  component: React.ComponentType<any>;
-  styles: any;
-  children: ((params?: any) => ReactNode) | string;
-};
 
 const Chat: React.FC<Props> = props => {
   const [inputViewHeight, setInputViewHeight] = useState(0);
   const [markdownBlocks, setMarkdownBlocks] = useState<string[]>([]);
+  const [inputData, setInputData] = useState('');
+  const {stream} = useSocket();
+
   const renderCodeBlock = (
     language: string,
     code: string,
@@ -50,7 +56,7 @@ const Chat: React.FC<Props> = props => {
     } else {
       return (
         <View style={styles.codeContainer}>
-          <Text style={styles.codeLabel}>PY</Text>
+          <Text style={styles.codeLabel}>{language.toUpperCase()}</Text>
           <TouchableOpacityText
             onPress={() => Clipboard.setString(code)}
             style={styles.copyButton}>
@@ -61,44 +67,19 @@ const Chat: React.FC<Props> = props => {
       );
     }
   };
+
   const copyResponse = () => {
-    Clipboard.setString(element);
+    Clipboard.setString(markdownBlocks.join('\n'));
   };
 
-  const blocks = [
-    'HTML (HyperText Markup Language) is **Markup Language** the standard language used to create and design webpages. It structures web content using elements represented by tags, such as `<h1>` for headings, `<p>` for paragraphs, and `<a>` for links.',
-
-    '### Key Features of HTML:',
-
-    '1. **Markup Language**: Defines the structure of web pages using tags.',
-    '2. **Basic Building Block**: Works alongside CSS for styling and JavaScript for interactivity.',
-    '3. **Cross-Platform**: Supported by all modern browsers.',
-
-    '> hi',
-
-    'The killer feature of `markdown-it` is very effective support of',
-
-    '### Example:',
-
-    '```html\n<!DOCTYPE html>\n<html>\n<head>\n  <title>My Web Page</title>\n</head>\n<body>\n  <h1>Welcome to My Website</h1>\n  <p>This is a paragraph of text.</p>\n  <a href="https://example.com">Visit Example</a>\n</body>\n</html>\n```',
-
-    '```javascript\nvar code = 12\nlog(code+12);\nfunction kunal(){\n  return 12\n}\n```',
-
-    '```python\na = 5\nb = 3\nsum = a + b\nprint("The sum is", sum)\n```',
-  ];
-
   useEffect(() => {
-    // let index = 0;
-    // const interval = setInterval(() => {
-    //   if (index < blocks.length) {
-    //     setMarkdownBlocks(prev => [...prev, blocks[index]]);
-    //     index++;
-    //   } else {
-    //     clearInterval(interval);
-    //   }
-    // }, 500);
-    // return () => clearInterval(interval);
-  }, []);
+    stream.on('receive-answer', data => {
+      setMarkdownBlocks(prev => [...prev, data.chunk]);
+    });
+    // return () => {
+    //   stream.off('receive-answer');
+    // };
+  }, [stream]);
 
   const markdownStyle = {
     heading1: styles.h2Text,
@@ -107,7 +88,7 @@ const Chat: React.FC<Props> = props => {
       color: colors.white,
     },
     body: {
-      gap: 10,
+      gap: 0,
       height: 'auto',
     },
     paragraph: styles.paragraphText,
@@ -136,13 +117,12 @@ const Chat: React.FC<Props> = props => {
     },
   };
 
-  const fetchStreamWithAxios = async () => {
-    const url = 'http://192.168.0.133:3001';
-
-    const stream = io(url);
-    stream.on('connect', () => {
-      console.log('connected');
+  const sendMessage = async () => {
+    stream.emit('ask-question', {
+      message: inputData,
+      model: 'gemini',
     });
+    setInputData('');
   };
 
   return (
@@ -187,25 +167,26 @@ const Chat: React.FC<Props> = props => {
                 <View style={styles.receiver}>
                   <View style={styles.receiverMessageBox}>
                     <View style={styles.receiverMessage}>
-                      {markdownBlocks.map((bl, index) => (
-                        <Markdown
-                          key={index}
-                          rules={{
-                            fence: (node: any) =>
-                              renderCodeBlock(node.sourceInfo, node.content),
-                          }}
-                          style={markdownStyle}>
-                          {bl}
-                        </Markdown>
-                      ))}
+                      <Markdown
+                        key={markdownBlocks.length}
+                        rules={{
+                          fence: (node: any) =>
+                            renderCodeBlock(node.sourceInfo, node.content),
+                        }}
+                        style={markdownStyle}>
+                        {markdownBlocks.length > 0
+                          ? markdownBlocks?.reduce(
+                              (acc, curr) => acc + '' + curr,
+                            )
+                          : ''}
+                      </Markdown>
                       <IconButton
                         name="content-copy"
                         variant="secondary"
                         size="xs"
                         iconSize={15}
                         color={colors.sulu}
-                        // onPress={copyResponse}
-                        onPress={fetchStreamWithAxios}
+                        onPress={copyResponse}
                       />
                     </View>
                   </View>
@@ -215,7 +196,12 @@ const Chat: React.FC<Props> = props => {
             </ScrollView>
           </View>
         </View>
-        <InputMessageBox setHeight={setInputViewHeight} />
+        <InputMessageBox
+          sendButton={sendMessage}
+          setInput={setInputData}
+          inputValue={inputData}
+          setHeight={setInputViewHeight}
+        />
       </View>
     </View>
   );
@@ -233,7 +219,7 @@ const HowCanIHelpYou = () => {
   );
 };
 
-const InputMessageBox = ({setHeight}) => {
+const InputMessageBox = ({setHeight, setInput, inputValue, sendButton}) => {
   return (
     <View
       onLayout={event => setHeight(event.nativeEvent.layout.height + 30)}
@@ -254,6 +240,10 @@ const InputMessageBox = ({setHeight}) => {
         placeholderTextColor={colors.white}
         cursorColor={colors.sulu}
         style={styles.input}
+        defaultValue={inputValue}
+        onChange={e => {
+          setInput(e.nativeEvent.text);
+        }}
       />
       <IconButton
         name="send"
@@ -261,6 +251,10 @@ const InputMessageBox = ({setHeight}) => {
         size="lg"
         iconSize={24}
         color={colors.gray}
+        onPress={()=>{
+          sendButton();
+          Keyboard.dismiss()
+        }}
       />
     </View>
   );
