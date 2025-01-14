@@ -46,7 +46,7 @@ const Index: React.FC<Props> = props => {
           screenOptions={{
             headerShown: false,
           }}
-          initialRouteName="profile-tab">
+          initialRouteName="home-tab">
           {tabData.map((tab, index) => (
             <Tab.Screen
               key={index}

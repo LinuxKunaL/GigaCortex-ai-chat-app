@@ -5,6 +5,7 @@
   "scripts": {
     "start:server": "cd server && npm run start",
     "start:app": "cd app && npm run start",
+    "start:monitor-mobile": "scrcpy",
     "start:app:reset": "cd app && npm run start -- --reset-cache",
     "install:all": "cd app && npm install && cd ../server && npm install"
   },

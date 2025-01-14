@@ -8,7 +8,14 @@ import {
   Keyboard,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import React, {Fragment, ReactNode, useEffect, useState} from 'react';
+import React, {
+  Fragment,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import globalStyles from '../styles/style';
 import typographyStyles from '../constants/typography';
 import sizes from '../constants/sizes';
@@ -28,14 +35,28 @@ import Markdown from 'react-native-markdown-display';
 import spaces from '../constants/spaces';
 import {io} from 'socket.io-client';
 import useSocket from '../hooks/useSocket';
+import markdownStyle from '../constants/markdown';
 
 type Props = defaultProps & {};
+type TConversionObject = {
+  id: number;
+  me: string;
+  ai: string;
+};
+type TAnswerObject = {
+  questionId: number;
+  answerInChunk: string[];
+  isCompleted: boolean;
+};
 
 const Chat: React.FC<Props> = props => {
   const [inputViewHeight, setInputViewHeight] = useState(0);
-  const [markdownBlocks, setMarkdownBlocks] = useState<string[]>([]);
+  const [conversionObject, setConversionObject] = useState<TConversionObject[]>(
+    [],
+  );
   const [inputData, setInputData] = useState('');
   const {stream} = useSocket();
+  const conversionObjectRef = useRef(conversionObject);
 
   const renderCodeBlock = (
     language: string,
@@ -72,57 +93,57 @@ const Chat: React.FC<Props> = props => {
     Clipboard.setString(markdownBlocks.join('\n'));
   };
 
-  useEffect(() => {
-    stream.on('receive-answer', data => {
-      setMarkdownBlocks(prev => [...prev, data.chunk]);
-    });
-    // return () => {
-    //   stream.off('receive-answer');
-    // };
-  }, [stream]);
+  const sendMessage = async () => {
+    const id = getRandomNumber(20, 100);
 
-  const markdownStyle = {
-    heading1: styles.h2Text,
-    heading3: {
-      fontFamily: fonts.RubikMedium,
-      color: colors.white,
-    },
-    body: {
-      gap: 0,
-      height: 'auto',
-    },
-    paragraph: styles.paragraphText,
-    code_inline: {
-      backgroundColor: colors.gray500,
-      fontStyle: 'italic',
-      color: colors.white,
-    },
-    strong: {
-      fontWeight: '700',
-    },
-    list_item: {
-      ...styles.paragraphText,
-    },
-    blockquote: {
-      backgroundColor: colors.gray,
-      borderRadius: 3,
-      borderColor: colors.gray500,
-    },
-    link: {
-      color: colors.sulu,
-      fontStyle: 'italic',
-    },
-    image: {
-      borderRadius: spaces.radius,
-    },
+    setConversionObject(prev => {
+      return [
+        ...prev,
+        {
+          id: id,
+          me: inputData,
+          ai: [],
+        },
+      ];
+    });
+
+    const data = {
+      question: {
+        id: id,
+        text: inputData,
+      },
+      chatModel: 'gemini',
+    };
+
+    stream.emit('ask-question', data);
+
+    setInputData('');
   };
 
-  const sendMessage = async () => {
-    stream.emit('ask-question', {
-      message: inputData,
-      model: 'gemini',
-    });
-    setInputData('');
+  useEffect(() => {
+    conversionObjectRef.current = conversionObject;
+  }, [conversionObject]);
+
+  useEffect(() => {
+    const handleReceiveAnswer = (data: TAnswerObject) => {
+      const {questionId} = data;
+      setConversionObject(prev => {
+        return prev.map(item =>
+          item.id === questionId
+            ? {...item, ai: [...(item.ai || []), ...(data.answerInChunk || [])]}
+            : item,
+        );
+      });
+    };
+    stream.on('receive-answer', handleReceiveAnswer);
+  }, [stream]);
+
+  function getRandomNumber(min, max) {
+    return (Math.random() * (max - min) + min).toFixed(0);
+  }
+
+  const changeInput = (value: string) => {
+    setInputData(value);
   };
 
   return (
@@ -140,65 +161,83 @@ const Chat: React.FC<Props> = props => {
           />
         </View>
         <View style={styles.conversationBox}>
-          {/* <HowCanIHelpYou /> */}
-          <View style={styles.width100}>
-            <Gap height={30} />
-            <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
-              <View
+          {conversionObject.length === 0 ? (
+            <HowCanIHelpYou />
+          ) : (
+            <View style={styles.width100}>
+              <ScrollView
                 style={{
-                  ...styles.conversionBlock,
-                  marginBottom: inputViewHeight,
-                }}>
-                <View style={styles.sender}>
-                  <View style={styles.senderMessageBox}>
-                    <Text
-                      style={[
-                        typographyStyles.label,
-                        styles.senderMessageText,
-                      ]}>
-                      what is javascript
-                    </Text>
-                  </View>
-                  <Image
-                    style={styles.senderAvatar}
-                    srcSet="https://avatar.iran.liara.run/public/11"
-                  />
+                  flex: 1,
+                }}
+                showsVerticalScrollIndicator={false}>
+                <Gap height={30} />
+                <View
+                  style={{
+                    ...styles.conversionBlock,
+                    marginBottom: inputViewHeight,
+                  }}>
+                  {conversionObject.map((item, index) => (
+                    <React.Fragment key={index}>
+                      <View style={styles.sender}>
+                        <View style={styles.senderMessageBox}>
+                          <Text
+                            style={[
+                              typographyStyles.label,
+                              styles.senderMessageText,
+                            ]}>
+                            {item.me}
+                          </Text>
+                        </View>
+                        <Image
+                          style={styles.senderAvatar}
+                          srcSet="https://avatar.iran.liara.run/public/11"
+                        />
+                      </View>
+                      <View style={styles.receiver}>
+                        <View style={styles.receiverMessageBox}>
+                          {item.ai.length > 0 ? (
+                            <View style={styles.receiverMessage}>
+                              <Markdown
+                                key={index}
+                                rules={{
+                                  fence: (node: any) =>
+                                    renderCodeBlock(
+                                      node.sourceInfo,
+                                      node.content,
+                                    ),
+                                }}
+                                style={markdownStyle}>
+                                {item.ai?.reduce(
+                                  (acc, curr) => acc + '' + curr,
+                                )}
+                              </Markdown>
+                              <IconButton
+                                name="content-copy"
+                                variant="secondary"
+                                size="xs"
+                                iconSize={15}
+                                color={colors.sulu}
+                                onPress={copyResponse}
+                              />
+                            </View>
+                          ) : (
+                            <Text style={styles.receiverMessageText}>
+                              Loading...
+                            </Text>
+                          )}
+                        </View>
+                        <Icon name="creation" size={20} color={colors.white} />
+                      </View>
+                    </React.Fragment>
+                  ))}
                 </View>
-                <View style={styles.receiver}>
-                  <View style={styles.receiverMessageBox}>
-                    <View style={styles.receiverMessage}>
-                      <Markdown
-                        key={markdownBlocks.length}
-                        rules={{
-                          fence: (node: any) =>
-                            renderCodeBlock(node.sourceInfo, node.content),
-                        }}
-                        style={markdownStyle}>
-                        {markdownBlocks.length > 0
-                          ? markdownBlocks?.reduce(
-                              (acc, curr) => acc + '' + curr,
-                            )
-                          : ''}
-                      </Markdown>
-                      <IconButton
-                        name="content-copy"
-                        variant="secondary"
-                        size="xs"
-                        iconSize={15}
-                        color={colors.sulu}
-                        onPress={copyResponse}
-                      />
-                    </View>
-                  </View>
-                  <Icon name="creation" size={24} color={colors.white} />
-                </View>
-              </View>
-            </ScrollView>
-          </View>
+              </ScrollView>
+            </View>
+          )}
         </View>
         <InputMessageBox
           sendButton={sendMessage}
-          setInput={setInputData}
+          changeInput={changeInput}
           inputValue={inputData}
           setHeight={setInputViewHeight}
         />
@@ -219,7 +258,7 @@ const HowCanIHelpYou = () => {
   );
 };
 
-const InputMessageBox = ({setHeight, setInput, inputValue, sendButton}) => {
+const InputMessageBox = ({setHeight, changeInput, inputValue, sendButton}) => {
   return (
     <View
       onLayout={event => setHeight(event.nativeEvent.layout.height + 30)}
@@ -242,7 +281,7 @@ const InputMessageBox = ({setHeight, setInput, inputValue, sendButton}) => {
         style={styles.input}
         defaultValue={inputValue}
         onChange={e => {
-          setInput(e.nativeEvent.text);
+          changeInput(e.nativeEvent.text);
         }}
       />
       <IconButton
@@ -251,9 +290,9 @@ const InputMessageBox = ({setHeight, setInput, inputValue, sendButton}) => {
         size="lg"
         iconSize={24}
         color={colors.gray}
-        onPress={()=>{
+        onPress={() => {
           sendButton();
-          Keyboard.dismiss()
+          Keyboard.dismiss();
         }}
       />
     </View>
@@ -342,6 +381,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     height: '100%',
     flex: 1,
+    color: colors.white,
   },
   h2Text: {
     ...typographyStyles.h2,
@@ -372,11 +412,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 6,
-  },
-  paragraphText: {
-    ...typographyStyles.subtitle,
-    color: colors.gray100,
-    lineHeight: 24,
   },
   codeContainer: {
     backgroundColor: colors.gray,
