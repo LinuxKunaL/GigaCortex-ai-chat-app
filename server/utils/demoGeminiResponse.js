@@ -15,7 +15,6 @@ export default [
     "usageMetadata": { "promptTokenCount": 37, "totalTokenCount": 37 },
     "modelVersion": "gemini-1.5-flash"
   },
-
   {
     "candidates": [
       {

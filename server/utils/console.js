@@ -10,8 +10,9 @@ const print = (string, color) => {
     gray: "\x1b[90m",
     grayLight: "\x1b[90m",
     black: "\x1b[40m",
-  };
-  console.log(`${colors[color]}${string}\x1b[0m`);
+  }
+  console.log(`${colors[color]}${string}\x1b[0m`)
+
 };
 
 export default print;
