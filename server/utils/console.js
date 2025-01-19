@@ -12,7 +12,6 @@ const print = (string, color) => {
     black: "\x1b[40m",
   }
   console.log(`${colors[color]}${string}\x1b[0m`)
-
 };
 
 export default print;
