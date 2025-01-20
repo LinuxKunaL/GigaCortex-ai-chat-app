@@ -8,10 +8,11 @@ type Props = {
   size?: number;
   color?: string;
   style?: ViewStyle;
+  onPress?: () => void;
 };
 
 const Icon: React.FC<Props> = props => {
-  return <IconView name={props.name} size={props.size} color={props.color} />;
+  return <IconView style={props.style} onPress={props.onPress}  name={props.name} size={props.size} color={props.color} />;
 };
 
 export default Icon;

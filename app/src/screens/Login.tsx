@@ -11,6 +11,7 @@ import Button from '../components/interface/Button';
 import InputController from '../components/interface/InputController';
 import GoogleLogo from '../assets/svg/GoogleLogo';
 import fonts from '../constants/fonts';
+import useAuth from '../hooks/useAuth';
 
 type Props = defaultProps & {};
 
@@ -21,8 +22,10 @@ const Login: React.FC<Props> = props => {
     formState: {errors},
   } = useForm();
 
+  const {login} = useAuth();
+
   const onSubmit = (params: any): void => {
-    console.log(params);
+    login(params);
   };
 
   return (

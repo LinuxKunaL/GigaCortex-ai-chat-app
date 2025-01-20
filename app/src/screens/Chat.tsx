@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   Image,
   StyleSheet,
@@ -8,14 +7,7 @@ import {
   Keyboard,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import React, {
-  Fragment,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import globalStyles from '../styles/style';
 import typographyStyles from '../constants/typography';
 import sizes from '../constants/sizes';
@@ -32,8 +24,6 @@ import TouchableOpacityText from '../components/interface/TouchableOpacityText';
 import CodeBlock from '../components/interface/CodeBlock';
 import defaultProps from '../types/props';
 import Markdown from 'react-native-markdown-display';
-import spaces from '../constants/spaces';
-import {io} from 'socket.io-client';
 import useSocket from '../hooks/useSocket';
 import markdownStyle from '../constants/markdown';
 
@@ -221,7 +211,7 @@ const Chat: React.FC<Props> = props => {
                               />
                             </View>
                           ) : (
-                            <Text style={styles.receiverMessageText}>
+                            <Text style={styles.receiverMessage}>
                               Loading...
                             </Text>
                           )}

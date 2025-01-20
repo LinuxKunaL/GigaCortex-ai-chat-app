@@ -1,10 +1,10 @@
 import {KeyboardTypeOptions, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {Control, Controller} from 'react-hook-form';
 import Input from './Input';
 import typographyStyles from '../../constants/typography';
 import colors from '../../constants/colors';
-import Gap from './Gap';
+import Icon from './Icon';
 
 type Props = {
   control: Control;
@@ -24,6 +24,7 @@ type Props = {
 };
 
 const InputController: React.FC<Props> = props => {
+  const [isPassword, setIsPassword] = useState(props.isPassword);
   return (
     <Controller
       control={props.control}
@@ -37,15 +38,25 @@ const InputController: React.FC<Props> = props => {
       }}
       render={({field: {onChange, onBlur, value}}) => (
         <View>
-          <Input
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            placeholder={props.placeholder}
-            defaultValue={props.defaultValue}
-            isPassword={props.isPassword}
-          />
-          <Gap height={5} />
+          <View style={styles.inputStyle}>
+            <Input
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              placeholder={props.placeholder}
+              defaultValue={props.defaultValue}
+              isPassword={isPassword}
+            />
+            {props.isPassword && (
+              <Icon
+                style={styles.iconStyle}
+                onPress={() => setIsPassword(!isPassword)}
+                name="eye"
+                color={colors.sulu}
+                size={18}
+              />
+            )}
+          </View>
           {props.errors?.[props.name] && (
             <Text style={[typographyStyles.subtitle, styles.errorMessage]}>
               {props.errors[props.name]?.message as string}
@@ -61,4 +72,15 @@ export default InputController;
 
 const styles = StyleSheet.create({
   errorMessage: {color: colors.red, textAlign: 'left', width: '100%'},
+  inputStyle: {
+    position: 'relative',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconStyle: {
+    position: 'absolute',
+    right: 15,
+    top: 14,
+  },
 });

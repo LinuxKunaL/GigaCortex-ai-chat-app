@@ -1,4 +1,10 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
 import globalStyles from '../styles/style';
 import typographyStyles from '../constants/typography';
@@ -11,6 +17,7 @@ import InputController from '../components/interface/InputController';
 import GoogleLogo from '../assets/svg/GoogleLogo';
 import fonts from '../constants/fonts';
 import defaultProps from '../types/props';
+import useAuth from '../hooks/useAuth';
 type Props = defaultProps & {};
 
 const Register: React.FC<Props> = props => {
@@ -20,8 +27,16 @@ const Register: React.FC<Props> = props => {
     formState: {errors},
   } = useForm();
 
+  const {register} = useAuth();
+
   const onSubmit = (params: any): void => {
-    console.log(params);
+    if (params.password !== params.passwordAgain) {
+      return ToastAndroid.show(
+        'Password and confirm password must be same',
+        ToastAndroid.SHORT,
+      );
+    }
+    register(params);
   };
 
   return (
