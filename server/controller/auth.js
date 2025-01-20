@@ -22,7 +22,7 @@ class Auth {
       }
 
       const token = await user.generateToken();
-
+      
       res.status(200).json({
         message: "Login successful ✅",
         token,
@@ -92,7 +92,7 @@ class Auth {
         createdAt: 0,
       });
 
-      res.status(200).json({ user });
+      res.status(200).json({ success: true, user });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

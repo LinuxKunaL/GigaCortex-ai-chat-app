@@ -9,6 +9,8 @@ import Login from './screens/Login';
 import Register from './screens/Register';
 import Home from './screens/home/index.tsx';
 import Chat from './screens/Chat.tsx';
+import {Provider} from 'react-redux';
+import {store} from './app/redux.ts';
 
 function App(): React.JSX.Element {
   const Stack = createNativeStackNavigator();
@@ -17,17 +19,23 @@ function App(): React.JSX.Element {
     animation: 'default',
   };
   return (
-    <NavigationContainer>
-      <StatusBar translucent={false} backgroundColor={colors.dark} />
-      <Stack.Navigator initialRouteName="register">
-        <Stack.Screen options={options} name="splash" component={Splash} />
-        <Stack.Screen options={options} name="intro" component={Intro} />
-        <Stack.Screen options={options} name="login" component={Login} />
-        <Stack.Screen options={options} name="register" component={Register} />
-        <Stack.Screen options={options} name="home" component={Home} />
-        <Stack.Screen options={options} name="chat" component={Chat} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <StatusBar translucent={false} backgroundColor={colors.dark} />
+        <Stack.Navigator initialRouteName="splash">
+          <Stack.Screen options={options} name="splash" component={Splash} />
+          <Stack.Screen options={options} name="intro" component={Intro} />
+          <Stack.Screen options={options} name="login" component={Login} />
+          <Stack.Screen
+            options={options}
+            name="register"
+            component={Register}
+          />
+          <Stack.Screen options={options} name="home" component={Home} />
+          <Stack.Screen options={options} name="chat" component={Chat} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 }
 

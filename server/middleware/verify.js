@@ -5,15 +5,11 @@ import MUser from "../database/model/user.js";
 const verify = (req, res, next) => {
   try {
     // skip auth route
-    if (
-      req.path === "/api/auth/login" ||
-      req.path === "/api/auth/register" ||
-      req.path === "/api/chat/conversation"
-    ) {
+    if (req.path === "/api/auth/login" || req.path === "/api/auth/register") {
       return next();
     }
 
-    //check if authorization header is set
+    // check if authorization header is set
     if (!req.headers.authorization) {
       return res.status(401).json({ error: "authorization header not found" });
     }

@@ -6,12 +6,14 @@ import globalStyles from '../styles/style';
 import Logo from '../assets/svg/Logo';
 import colors from '../constants/colors';
 import WebPattern from '../assets/svg/WebPattern';
+import useAuth from '../hooks/useAuth';
 
 type Props = defaultProps & {};
 
 const Splash: React.FC<Props> = props => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.6)).current;
+  const {isAuthenticated} = useAuth();
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -27,12 +29,19 @@ const Splash: React.FC<Props> = props => {
       useNativeDriver: true,
     }).start();
     const nativeTimeout = setTimeout(() => {
-      props.navigation.navigate('intro');
+      isAuthenticated().then(result => {
+        if (result) {
+          props.navigation.navigate('home');
+        }
+        if (!result) {
+          props.navigation.navigate('intro');
+        }
+      });
     }, 3000);
     return () => {
       clearTimeout(nativeTimeout);
     };
-  }, [fadeAnim, scaleAnim, props.navigation]);
+  }, [fadeAnim, scaleAnim, props.navigation, isAuthenticated]);
 
   return (
     <View style={globalStyles.container}>

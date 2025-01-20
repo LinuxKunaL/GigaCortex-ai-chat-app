@@ -8,6 +8,6 @@ router.route("/login").post(auth.login);
 router.route("/register").post(auth.register);
 router.route("/change-password").post(auth.changePassword);
 
-router.route("/me").get(auth.me);
+router.route("/me").post(auth.me);
 
 export default router;
