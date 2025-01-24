@@ -8,8 +8,8 @@ function useAsyncStorage() {
         data = JSON.stringify(value);
       }
       await AsyncStorage.setItem(key, data);
-    } catch (e) {
-      console.log(e);
+    } catch (e: any) {
+      console.log(e.message);
     }
   };
 

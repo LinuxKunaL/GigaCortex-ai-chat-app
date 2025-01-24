@@ -1,9 +1,4 @@
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import RawBottomSheet from 'react-native-raw-bottom-sheet';
 import React from 'react';
 import {RBSheetRef} from '../../types/rbSheetRef';
@@ -17,72 +12,16 @@ import fonts from '../../constants/fonts';
 
 type Props = {
   ref: RBSheetRef;
-};
-type TPurchaseHistoryItem = {
-  id: number;
-  token: number;
-  total: number;
-  paymentId: string;
+  transactionHistory: {
+    date: string;
+    credit: number;
+    amount: number;
+    paymentId: string;
+  }[];
 };
 
 const PurchaseHistory = React.forwardRef<RBSheetRef, Props>(
   (props, ref: any): JSX.Element => {
-    const items: TPurchaseHistoryItem[] = [
-      {
-        id: 1,
-        token: 98,
-        total: 1290,
-        paymentId: 'Prx_123456789',
-      },
-      {
-        id: 2,
-        token: 98,
-        total: 1290,
-        paymentId: 'Prx_123456789',
-      },
-      {
-        id: 3,
-        token: 98,
-        total: 1290,
-        paymentId: 'Prx_123456789',
-      },
-      {
-        id: 4,
-        token: 98,
-        total: 1290,
-        paymentId: 'Prx_123456789',
-      },
-      {
-        id: 5,
-        token: 98,
-        total: 1290,
-        paymentId: 'Prx_123456789',
-      },
-      {
-        id: 6,
-        token: 98,
-        total: 1290,
-        paymentId: 'Prx_123456789',
-      },
-      {
-        id: 7,
-        token: 98,
-        total: 1290,
-        paymentId: 'Prx_123456789',
-      },
-      {
-        id: 8,
-        token: 98,
-        total: 1290,
-        paymentId: 'Prx_123456789',
-      },
-      {
-        id: 9,
-        token: 98,
-        total: 1290,
-        paymentId: 'Prx_123456789',
-      },
-    ];
     return (
       <RawBottomSheet
         ref={ref}
@@ -113,27 +52,34 @@ const PurchaseHistory = React.forwardRef<RBSheetRef, Props>(
           <Gap height={15} />
           <ScrollView>
             <View style={{gap: sizes.xs}}>
-              {items.map(item => (
-                <View style={styles.itemView} key={item.id}>
+              {props.transactionHistory.map((item, index) => (
+                <View style={styles.itemView} key={index}>
                   <View style={styles.itemInnerView}>
                     <View style={styles.tokenOrTotal}>
                       <Text style={styles.itemText}>
-                        Token : <Text style={styles.itemSubtext}>98</Text>
+                        Credit :{' '}
+                        <Text style={styles.itemSubtext}>{item.credit}</Text>
                       </Text>
                       <Text style={styles.itemText}>
-                        Total : <Text style={styles.itemSubtext}>₹200</Text>
+                        Total :{' '}
+                        <Text style={styles.itemSubtext}>₹{item.amount}</Text>
                       </Text>
                     </View>
                     <Text style={styles.itemText}>
                       Payment id :
-                      <Text style={styles.itemSubtext}> Prx_Ssdd12ddd</Text>
+                      <Text style={styles.itemSubtext}>{item.paymentId}</Text>
                     </Text>
                     <Text style={styles.itemText}>
-                      Date :<Text style={styles.itemSubtext}> 23 Nov 24</Text>
+                      Date :<Text style={styles.itemSubtext}>{item.date}</Text>
                     </Text>
                   </View>
                 </View>
               ))}
+              {props.transactionHistory.length === 0 && (
+                <Text style={{...styles.itemText, color: colors.gray100}}>
+                  No transaction history
+                </Text>
+              )}
             </View>
           </ScrollView>
         </View>

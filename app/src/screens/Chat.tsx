@@ -26,27 +26,37 @@ import defaultProps from '../types/props';
 import Markdown from 'react-native-markdown-display';
 import useSocket from '../hooks/useSocket';
 import markdownStyle from '../constants/markdown';
+import {useSelector} from 'react-redux';
+import {RootState} from '../app/redux';
 
 type Props = defaultProps & {};
 type TConversionObject = {
-  id: number;
   me: string;
-  ai: string;
+  ai: string[];
 };
 type TAnswerObject = {
   questionId: number;
   answerInChunk: string[];
   isCompleted: boolean;
 };
-
+type TInputMessageBox = {
+  setHeight: (height: number) => void;
+  changeInput: (value: string) => void;
+  inputValue: string;
+  sendButton: () => void;
+};
 const Chat: React.FC<Props> = props => {
   const [inputViewHeight, setInputViewHeight] = useState(0);
   const [conversionObject, setConversionObject] = useState<TConversionObject[]>(
     [],
   );
+  const [conversionId, setConversionId] = useState<string>('');
   const [inputData, setInputData] = useState('');
-  const {stream} = useSocket();
+  const [conversationTitle, setConversationTitle] =
+    useState<string>('New Title');
   const conversionObjectRef = useRef(conversionObject);
+  const {stream} = useSocket();
+  const me = useSelector((state: RootState) => state.me);
 
   const renderCodeBlock = (
     language: string,
@@ -84,13 +94,12 @@ const Chat: React.FC<Props> = props => {
   };
 
   const sendMessage = async () => {
-    const id = getRandomNumber(20, 100);
+    const userId = me._id;
 
     setConversionObject(prev => {
       return [
         ...prev,
         {
-          id: id,
           me: inputData,
           ai: [],
         },
@@ -98,10 +107,11 @@ const Chat: React.FC<Props> = props => {
     });
 
     const data = {
+      userId,
       question: {
-        id: id,
         text: inputData,
       },
+      conversionId,
       chatModel: 'gemini',
     };
 
@@ -126,11 +136,9 @@ const Chat: React.FC<Props> = props => {
       });
     };
     stream.on('receive-answer', handleReceiveAnswer);
+    stream.on('receive-conversation-id', (id: string) => setConversionId(id));
+    stream.on('receive-title', (title: string) => setConversationTitle(title));
   }, [stream]);
-
-  function getRandomNumber(min, max) {
-    return (Math.random() * (max - min) + min).toFixed(0);
-  }
 
   const changeInput = (value: string) => {
     setInputData(value);
@@ -140,7 +148,7 @@ const Chat: React.FC<Props> = props => {
     <View style={styles.container}>
       <View style={styles.innerLayout}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>New Title</Text>
+          <Text style={styles.headerTitle}>{conversationTitle}</Text>
           <IconButton
             name="close"
             variant="secondary"
@@ -156,9 +164,7 @@ const Chat: React.FC<Props> = props => {
           ) : (
             <View style={styles.width100}>
               <ScrollView
-                style={{
-                  flex: 1,
-                }}
+                style={styles.flex1}
                 showsVerticalScrollIndicator={false}>
                 <Gap height={30} />
                 <View
@@ -178,10 +184,7 @@ const Chat: React.FC<Props> = props => {
                             {item.me}
                           </Text>
                         </View>
-                        <Image
-                          style={styles.senderAvatar}
-                          srcSet="https://avatar.iran.liara.run/public/11"
-                        />
+                        <Image style={styles.senderAvatar} srcSet={me.avatar} />
                       </View>
                       <View style={styles.receiver}>
                         <View style={styles.receiverMessageBox}>
@@ -248,10 +251,10 @@ const HowCanIHelpYou = () => {
   );
 };
 
-const InputMessageBox = ({setHeight, changeInput, inputValue, sendButton}) => {
+const InputMessageBox = (props: TInputMessageBox) => {
   return (
     <View
-      onLayout={event => setHeight(event.nativeEvent.layout.height + 30)}
+      onLayout={event => props.setHeight(event.nativeEvent.layout.height + 30)}
       style={styles.messageInputBox}>
       <IconButton
         name="image"
@@ -269,9 +272,9 @@ const InputMessageBox = ({setHeight, changeInput, inputValue, sendButton}) => {
         placeholderTextColor={colors.white}
         cursorColor={colors.sulu}
         style={styles.input}
-        defaultValue={inputValue}
+        defaultValue={props.inputValue}
         onChange={e => {
-          changeInput(e.nativeEvent.text);
+          props.changeInput(e.nativeEvent.text);
         }}
       />
       <IconButton
@@ -281,7 +284,7 @@ const InputMessageBox = ({setHeight, changeInput, inputValue, sendButton}) => {
         iconSize={24}
         color={colors.gray}
         onPress={() => {
-          sendButton();
+          props.sendButton();
           Keyboard.dismiss();
         }}
       />
@@ -419,5 +422,8 @@ const styles = StyleSheet.create({
   copyButtonText: {
     ...typographyStyles.text,
     color: colors.white,
+  },
+  flex1: {
+    flex: 1,
   },
 });

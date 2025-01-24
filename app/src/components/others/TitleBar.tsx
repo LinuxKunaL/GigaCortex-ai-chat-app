@@ -5,10 +5,11 @@ import colors from '../../constants/colors';
 import strings from '../../utils/strings';
 import Icon from '../interface/Icon';
 import spaces from '../../constants/spaces';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../app/redux';
 
-type Props = {};
-
-const TitleBar: React.FC<Props> = props => {
+const TitleBar: React.FC = () => {
+  const me = useSelector((state: RootState) => state.me);
   return (
     <View style={styles.container}>
       <Text style={[typographyStyles.h2, {color: colors.white}]}>
@@ -16,7 +17,7 @@ const TitleBar: React.FC<Props> = props => {
       </Text>
       <View style={styles.creditView}>
         <Text style={[typographyStyles.subtitle, {color: colors.white}]}>
-          123
+          {me.credits?.balance}
         </Text>
         <Icon color={colors.sulu} size={18} name="creation" />
       </View>

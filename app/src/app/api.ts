@@ -14,9 +14,6 @@ api.interceptors.request.use(async conf => {
   return conf;
 });
 
-api.interceptors.response.use(
-  response => response,
-  async error => error,
-);
+api.interceptors.response.use(response => response);
 
 export default api;

@@ -14,14 +14,15 @@ import {RBSheetRef} from '../../types/rbSheetRef';
 import PurchaseHistory from '../../components/bottomSheets/PurchaseHistory';
 import ChangePassword from '../../components/bottomSheets/ChangePassword';
 import TermsAndPolicy from '../../components/bottomSheets/TermsAndPrivacy';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../app/redux';
 
-type Props = {};
-
-const Profile: React.FC<Props> = props => {
+const Profile: React.FC = () => {
   const REFPurchaseToken = React.useRef<RBSheetRef>(null);
   const REFPurchaseTokenHistory = React.useRef<RBSheetRef>(null);
   const REFChangePassword = React.useRef<RBSheetRef>(null);
   const REFTermsAndPolicy = React.useRef<RBSheetRef>(null);
+  const me = useSelector((state: RootState) => state.me);
 
   const options = [
     {
@@ -53,18 +54,16 @@ const Profile: React.FC<Props> = props => {
       onPress: () => {},
     },
   ];
+
   return (
     <View style={{...globalStyles.container}}>
       <View style={styles.layout}>
         <Gap height={sizes.xs} />
         <View style={styles.profileLayout}>
-          <Image
-            style={styles.imageAvatar}
-            srcSet="https://avatar.iran.liara.run/public/11"
-          />
+          <Image style={styles.imageAvatar} srcSet={me.avatar} />
           <View style={styles.profileTextView}>
-            <Text style={styles.profileName}>kunal lokhande</Text>
-            <Text style={styles.profileEmail}>kunallokhande774@gmail.com</Text>
+            <Text style={styles.profileName}>{me.name}</Text>
+            <Text style={styles.profileEmail}>{me.email}</Text>
             <TouchableOpacity
               onPress={() => REFChangePassword.current?.open()}
               activeOpacity={0.7}>
@@ -81,9 +80,9 @@ const Profile: React.FC<Props> = props => {
           <View style={styles.tokensInnerView}>
             <Icon name="star-circle" color={colors.sulu} size={30} />
             <Text style={{...typographyStyles.h1, color: colors.white}}>
-              233{' '}
+              {me.credits?.balance}{' '}
               <Text style={{...typographyStyles.title, color: colors.gray300}}>
-                Tokens
+                Credits
               </Text>
             </Text>
           </View>
@@ -131,7 +130,10 @@ const Profile: React.FC<Props> = props => {
         </View>
       </View>
       <PurchaseToken ref={REFPurchaseToken} />
-      <PurchaseHistory ref={REFPurchaseTokenHistory} />
+      <PurchaseHistory
+        transactionHistory={me.credits?.transactionHistory ?? []}
+        ref={REFPurchaseTokenHistory}
+      />
       <ChangePassword ref={REFChangePassword} />
       <TermsAndPolicy ref={REFTermsAndPolicy} />
     </View>
