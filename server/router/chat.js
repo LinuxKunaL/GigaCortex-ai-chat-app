@@ -5,6 +5,9 @@ const chat = new Chat();
 
 const router = Router();
 
-router.route("/conversations-list").get(chat.getConversationsList);
+router
+  .route("/conversations")
+  .get(chat.getConversationsList)
+  .delete(chat.deleteConversation);
 
 export default router;

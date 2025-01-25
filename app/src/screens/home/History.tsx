@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
+  ToastAndroid,
 } from 'react-native';
 import React, {Fragment, useEffect, useState} from 'react';
 import globalStyles from '../../styles/style';
@@ -15,10 +16,11 @@ import typographyStyles from '../../constants/typography';
 import colors from '../../constants/colors';
 import spaces from '../../constants/spaces';
 import fonts from '../../constants/fonts';
-import {GestureHandlerRootView, Swipeable} from 'react-native-gesture-handler';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import Icon from '../../components/interface/Icon';
 import Button from '../../components/interface/Button';
 import useChat from '../../hooks/useChat';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 type Props = {};
 type TConversationList = {
   _id: string;
@@ -28,50 +30,47 @@ type TConversationList = {
 };
 
 const History: React.FC<Props> = props => {
-  const {getConversationsList} = useChat();
+  const {getConversationsList, deleteConversation} = useChat();
+  const [refreshList, setRefreshList] = useState<number>(0);
   const [conversationsList, setConversationsList] = useState<
     TConversationList[]
   >([]);
 
   useEffect(() => {
-    getConversationsList().then(res => {
-      setConversationsList(res.data);
-    });
-    return () => {};
-  }, []);
+    const fetchConversations = async () => {
+      try {
+        const res = await getConversationsList();
+        setConversationsList(res.data);
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+        ToastAndroid.show('Failed to fetch conversations.', ToastAndroid.SHORT);
+      } finally {
+      }
+    };
+    fetchConversations();
+  }, [refreshList, getConversationsList]);
 
   const handleOpenConversation = (id: string) => {
     console.log(id);
   };
 
-  const renderRightActions = () => {
+  const handleDeleteConversation = async (id: string) => {
+    const result = await deleteConversation(id);
+    if (result.success) {
+      ToastAndroid.show(result.massage, ToastAndroid.SHORT);
+      setRefreshList(prev => prev + 1);
+    }
+  };
+  const renderRightActions = (id: string) => {
     return (
-      <Fragment>
-        <Button
-          variant="secondary"
-          fontSize="xs"
-          size="lg"
-          style={[
-            styles.listDeleteButton,
-            {
-              backgroundColor: colors.red,
-            },
-          ]}>
-          <Icon color={colors.white} name="delete" size={19} />
-        </Button>
-        <Button
-          variant="secondary"
-          fontSize="xs"
-          size="lg"
-          style={[
-            styles.listDeleteButton,
-            {
-              backgroundColor: colors.blue,
-            },
-          ]}>
-          <Icon color={colors.white} name="pin" size={19} />
-        </Button>
-      </Fragment>
+      <Button
+        variant="secondary"
+        fontSize="xs"
+        size="lg"
+        onPress={() => handleDeleteConversation(id)}
+        style={styles.listDeleteButton}>
+        <Icon color={colors.white} name="delete" size={19} />
+      </Button>
     );
   };
 
@@ -102,7 +101,9 @@ const History: React.FC<Props> = props => {
             <Gap height={sizes.xs} />
           </Fragment>
         )}
-        <Swipeable key={index} renderRightActions={() => renderRightActions()}>
+        <Swipeable
+          key={index}
+          renderRightActions={() => renderRightActions(item._id)}>
           <TouchableOpacity
             activeOpacity={0.8}
             style={styles.listItem}
@@ -126,49 +127,34 @@ const History: React.FC<Props> = props => {
           </TouchableOpacity>
         </Swipeable>
       </View>
-      // <Swipeable key={index} renderRightActions={() => renderRightActions()}>
-      //   <TouchableOpacity
-      //     activeOpacity={0.8}
-      //     style={styles.listItem}
-      //     onPress={() => handleOpenConversation(item._id)}>
-      //     <View style={styles.listItemInnerView}>
-      //       <Text
-      //         style={[
-      //           typographyStyles.label,
-      //           {color: colors.white, fontFamily: fonts.RubikMedium},
-      //         ]}>
-      //         {item.title}
-      //       </Text>
-      //       <Text style={[typographyStyles.label, styles.listItemTimeText]}>
-      //         {new Date(item.createAt).toLocaleTimeString()}
-      //       </Text>
-      //     </View>
-      //     <Gap height={5} />
-      //     <Text style={[typographyStyles.subtitle, {color: colors.gray300}]}>
-      //       {item.description}
-      //     </Text>
-      //   </TouchableOpacity>
-      // </Swipeable>
     );
   };
 
   return (
     <View style={globalStyles.container}>
       <View style={styles.layout}>
-        <Gap height={sizes.xs} />
-        <Input placeholder="Search By Title" />
-        <Gap height={sizes.xs} />
-        <ScrollView>
+        {conversationsList.length > 0 && (
           <GestureHandlerRootView style={{...globalStyles.debugBorder}}>
             <FlatList
               data={conversationsList}
               keyExtractor={item => item._id.toString()}
               renderItem={renderItem}
               ItemSeparatorComponent={ItemSeparator}
+              showsVerticalScrollIndicator={false}
+              ListHeaderComponent={<Gap height={sizes.xs} />}
+              ListFooterComponent={<Gap height={65 + 25} />}
             />
           </GestureHandlerRootView>
-        </ScrollView>
-        <Gap height={85} />
+        )}
+        {conversationsList.length === 0 && (
+          <View style={styles.noConversation}>
+            <Icon name="history" size={40} color={colors.sulu} />
+            <Gap height={sizes.xs} />
+            <Text style={[typographyStyles.label, {color: colors.gray100}]}>
+              No conversations yet
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -203,6 +189,8 @@ const styles = StyleSheet.create({
     borderRadius: spaces.radius,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.red,
   },
+  noConversation: {flex: 1, justifyContent: 'center', alignItems: 'center'},
 });
 export default History;

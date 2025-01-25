@@ -24,5 +24,20 @@ class Chat {
       });
     }
   }
+  async deleteConversation(req, res) {
+    try {
+      const { id } = req.query;
+      await MChat.findByIdAndDelete(id);
+      return res.status(200).json({
+        success: true,
+        massage: 'Conversation deleted',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
 }
 export default Chat;

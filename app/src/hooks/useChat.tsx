@@ -1,14 +1,32 @@
+import {useCallback} from 'react';
 import api from '../app/api';
 
 const useChat = () => {
-  const getConversationsList = async () => {
-    const result = await api.get('/chat/conversations-list');
-    if (result.data.success) {
-      return result.data;
+  /**
+   * I used the @seCallback hook to @memoize the
+   * getConversationsList function.
+   */
+  const getConversationsList = useCallback(async () => {
+    try {
+      const result = await api.get('/chat/conversations');
+      if (result.data.success) {
+        return result.data;
+      }
+    } catch (error) {
+      return error;
     }
-    return null;
+  }, []);
+  const deleteConversation = async (id: string) => {
+    try {
+      const result = await api.delete('/chat/conversations', {params: {id}});
+      if (result.data.success) {
+        return result.data;
+      }
+    } catch (error) {
+      return error;
+    }
   };
-  return {getConversationsList};
+  return {getConversationsList, deleteConversation};
 };
 
 export default useChat;
