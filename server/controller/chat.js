@@ -10,6 +10,7 @@ class Chat {
         { userId: 0, __v: 0, conversation: 0 }
       ).sort({
         updateAt: -1,
+        createAt: -1,
       });
 
       return res.status(200).json({

@@ -1,6 +1,12 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ScrollView,
+} from 'react-native';
 import React, {Fragment, useEffect, useState} from 'react';
-import {ScrollView} from 'react-native';
 import globalStyles from '../../styles/style';
 import Input from '../../components/interface/Input';
 import Gap from '../../components/interface/Gap';
@@ -76,35 +82,73 @@ const History: React.FC<Props> = props => {
     item: TConversationList;
     index: number;
   }) => {
-    const conversationDate = new Date(item.createAt).toLocaleDateString();
-    const currentTime = new Date().toLocaleDateString();
-  
-    console.log(conversationDate, currentTime);
-    
+    const currentDate = new Date(item.createAt).toLocaleDateString();
+    const previousDate =
+      index > 0 &&
+      new Date(conversationsList[index - 1]?.createAt).toLocaleDateString();
+
+    const isShowDate = currentDate !== previousDate;
+    const nowDate = new Date().toLocaleDateString();
+
     return (
-      <Swipeable key={index} renderRightActions={() => renderRightActions()}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.listItem}
-          onPress={() => handleOpenConversation(item._id)}>
-          <View style={styles.listItemInnerView}>
-            <Text
-              style={[
-                typographyStyles.label,
-                {color: colors.white, fontFamily: fonts.RubikMedium},
-              ]}>
-              {item.title}
+      <View>
+        {isShowDate && (
+          <Fragment>
+            <Text style={[typographyStyles.label, {color: colors.sulu}]}>
+              {currentDate === nowDate
+                ? 'Today'
+                : new Date(item.createAt).toDateString()}
             </Text>
-            <Text style={[typographyStyles.label, styles.listItemTimeText]}>
-              {new Date(item.createAt).toLocaleTimeString()}
+            <Gap height={sizes.xs} />
+          </Fragment>
+        )}
+        <Swipeable key={index} renderRightActions={() => renderRightActions()}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.listItem}
+            onPress={() => handleOpenConversation(item._id)}>
+            <View style={styles.listItemInnerView}>
+              <Text
+                style={[
+                  typographyStyles.label,
+                  {color: colors.white, fontFamily: fonts.RubikMedium},
+                ]}>
+                {item.title}
+              </Text>
+              <Text style={[typographyStyles.label, styles.listItemTimeText]}>
+                {new Date(item.createAt).toLocaleTimeString()}
+              </Text>
+            </View>
+            <Gap height={5} />
+            <Text style={[typographyStyles.subtitle, {color: colors.gray300}]}>
+              {item.description}
             </Text>
-          </View>
-          <Gap height={5} />
-          <Text style={[typographyStyles.subtitle, {color: colors.gray300}]}>
-            {item.description}
-          </Text>
-        </TouchableOpacity>
-      </Swipeable>
+          </TouchableOpacity>
+        </Swipeable>
+      </View>
+      // <Swipeable key={index} renderRightActions={() => renderRightActions()}>
+      //   <TouchableOpacity
+      //     activeOpacity={0.8}
+      //     style={styles.listItem}
+      //     onPress={() => handleOpenConversation(item._id)}>
+      //     <View style={styles.listItemInnerView}>
+      //       <Text
+      //         style={[
+      //           typographyStyles.label,
+      //           {color: colors.white, fontFamily: fonts.RubikMedium},
+      //         ]}>
+      //         {item.title}
+      //       </Text>
+      //       <Text style={[typographyStyles.label, styles.listItemTimeText]}>
+      //         {new Date(item.createAt).toLocaleTimeString()}
+      //       </Text>
+      //     </View>
+      //     <Gap height={5} />
+      //     <Text style={[typographyStyles.subtitle, {color: colors.gray300}]}>
+      //       {item.description}
+      //     </Text>
+      //   </TouchableOpacity>
+      // </Swipeable>
     );
   };
 
@@ -114,11 +158,7 @@ const History: React.FC<Props> = props => {
         <Gap height={sizes.xs} />
         <Input placeholder="Search By Title" />
         <Gap height={sizes.xs} />
-        <View>
-          <Text style={[typographyStyles.title, {color: colors.sulu}]}>
-            Today
-          </Text>
-          <Gap height={sizes.xs} />
+        <ScrollView>
           <GestureHandlerRootView style={{...globalStyles.debugBorder}}>
             <FlatList
               data={conversationsList}
@@ -127,7 +167,8 @@ const History: React.FC<Props> = props => {
               ItemSeparatorComponent={ItemSeparator}
             />
           </GestureHandlerRootView>
-        </View>
+        </ScrollView>
+        <Gap height={85} />
       </View>
     </View>
   );
