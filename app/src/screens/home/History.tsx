@@ -1,5 +1,5 @@
 import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {Fragment} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import {ScrollView} from 'react-native';
 import globalStyles from '../../styles/style';
 import Input from '../../components/interface/Input';
@@ -12,34 +12,31 @@ import fonts from '../../constants/fonts';
 import {GestureHandlerRootView, Swipeable} from 'react-native-gesture-handler';
 import Icon from '../../components/interface/Icon';
 import Button from '../../components/interface/Button';
+import useChat from '../../hooks/useChat';
 type Props = {};
-type TData = {
-  id: number;
+type TConversationList = {
+  _id: string;
   title: string;
-  subtitle: string;
-  time: string;
+  description: string;
+  createAt: Date;
 };
+
 const History: React.FC<Props> = props => {
-  const data: TData[] = [
-    {
-      id: 1,
-      title: 'Mastering JavaScript Logic',
-      subtitle: 'Understanding the fundamentals of coding.',
-      time: '3:45 PM',
-    },
-    {
-      id: 2,
-      title: 'Mastering JavaScript Logic',
-      subtitle: 'Understanding the fundamentals of coding.',
-      time: '3:45 PM',
-    },
-    {
-      id: 3,
-      title: 'Mastering JavaScript Logic',
-      subtitle: 'Understanding the fundamentals of coding.',
-      time: '3:45 PM',
-    },
-  ];
+  const {getConversationsList} = useChat();
+  const [conversationsList, setConversationsList] = useState<
+    TConversationList[]
+  >([]);
+
+  useEffect(() => {
+    getConversationsList().then(res => {
+      setConversationsList(res.data);
+    });
+    return () => {};
+  }, []);
+
+  const handleOpenConversation = (id: string) => {
+    console.log(id);
+  };
 
   const renderRightActions = () => {
     return (
@@ -72,11 +69,24 @@ const History: React.FC<Props> = props => {
     );
   };
 
-  const renderItem = (i: any) => {
-    const {item} = i;
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: TConversationList;
+    index: number;
+  }) => {
+    const conversationDate = new Date(item.createAt).toLocaleDateString();
+    const currentTime = new Date().toLocaleDateString();
+  
+    console.log(conversationDate, currentTime);
+    
     return (
-      <Swipeable renderRightActions={() => renderRightActions()}>
-        <TouchableOpacity activeOpacity={0.8} style={styles.listItem}>
+      <Swipeable key={index} renderRightActions={() => renderRightActions()}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.listItem}
+          onPress={() => handleOpenConversation(item._id)}>
           <View style={styles.listItemInnerView}>
             <Text
               style={[
@@ -86,12 +96,12 @@ const History: React.FC<Props> = props => {
               {item.title}
             </Text>
             <Text style={[typographyStyles.label, styles.listItemTimeText]}>
-              {item.time}
+              {new Date(item.createAt).toLocaleTimeString()}
             </Text>
           </View>
           <Gap height={5} />
           <Text style={[typographyStyles.subtitle, {color: colors.gray300}]}>
-            {item.subtitle}
+            {item.description}
           </Text>
         </TouchableOpacity>
       </Swipeable>
@@ -111,8 +121,8 @@ const History: React.FC<Props> = props => {
           <Gap height={sizes.xs} />
           <GestureHandlerRootView style={{...globalStyles.debugBorder}}>
             <FlatList
-              data={data}
-              keyExtractor={item => item.id.toString()}
+              data={conversationsList}
+              keyExtractor={item => item._id.toString()}
               renderItem={renderItem}
               ItemSeparatorComponent={ItemSeparator}
             />

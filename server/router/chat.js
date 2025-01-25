@@ -1,22 +1,10 @@
-/**
- * this is the router for chat
- * this router is not express router its @socket io
- * @param {Object} socket
- */
+import { Router } from "express";
+import Chat from "../controller/chat.js";
 
-import ChatController from "../controller/chat.js";
+const chat = new Chat();
 
-class chatRouter {
-  socket = null;
-  constructor(socket) {
-    this.socket = socket;
-    socket.on("ask-question", (data) => this.sendMessage(data));
-  }
+const router = Router();
 
-  sendMessage(data) {
-    const chatController = new ChatController();
-    chatController.conversation(this.socket, data);
-  }
-}
+router.route("/conversations-list").get(chat.getConversationsList);
 
-export default chatRouter;
+export default router;

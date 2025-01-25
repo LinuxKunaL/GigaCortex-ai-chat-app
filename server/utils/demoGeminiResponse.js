@@ -21,6 +21,22 @@ export default [
         content: {
           parts: [
             {
+              text: "this is description of this chat",
+            },
+          ],
+          role: "model",
+        },
+      },
+    ],
+    usageMetadata: { promptTokenCount: 37, totalTokenCount: 37 },
+    modelVersion: "gemini-1.5-flash",
+  },
+  {
+    candidates: [
+      {
+        content: {
+          parts: [
+            {
               text: "### Hello there!\n\nThis is a response to your greeting.  I hope you",
             },
           ],

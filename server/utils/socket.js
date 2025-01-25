@@ -1,5 +1,5 @@
 import print from "./console.js";
-import chatRouter from "../router/chat.js";
+import chatRouter from "../router/chat.socket.js";
 
 class Sockets {
   io = null;

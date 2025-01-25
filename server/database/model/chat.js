@@ -5,6 +5,9 @@ const chatSchema = new Schema({
     type: String,
     trim: true,
   },
+  description: {
+    type: String,
+  },
   userId: {
     type: Schema.Types.ObjectId,
   },
