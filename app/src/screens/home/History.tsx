@@ -1,27 +1,28 @@
 import {
+  Text,
+  View,
   FlatList,
   StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
   ToastAndroid,
+  TouchableOpacity,
 } from 'react-native';
-import React, {Fragment, useEffect, useState} from 'react';
-import globalStyles from '../../styles/style';
-import Input from '../../components/interface/Input';
-import Gap from '../../components/interface/Gap';
 import sizes from '../../constants/sizes';
-import typographyStyles from '../../constants/typography';
-import colors from '../../constants/colors';
-import spaces from '../../constants/spaces';
 import fonts from '../../constants/fonts';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import useChat from '../../hooks/useChat';
+import spaces from '../../constants/spaces';
+import colors from '../../constants/colors';
+import globalStyles from '../../styles/style';
+import Gap from '../../components/interface/Gap';
 import Icon from '../../components/interface/Icon';
 import Button from '../../components/interface/Button';
-import useChat from '../../hooks/useChat';
+import typographyStyles from '../../constants/typography';
+import React, {Fragment, useEffect, useState} from 'react';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-type Props = {};
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import defaultProps from '../../types/props';
+
+type Props = defaultProps & {};
+
 type TConversationList = {
   _id: string;
   title: string;
@@ -51,7 +52,7 @@ const History: React.FC<Props> = props => {
   }, [refreshList, getConversationsList]);
 
   const handleOpenConversation = (id: string) => {
-    console.log(id);
+    props.navigation.navigate('chat', {id});
   };
 
   const handleDeleteConversation = async (id: string) => {

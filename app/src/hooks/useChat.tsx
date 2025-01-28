@@ -16,6 +16,18 @@ const useChat = () => {
       return error;
     }
   }, []);
+
+  const getConversationById = useCallback(async (id: string) => {
+    try {
+      const result = await api.post('/chat/conversations', {id});
+      if (result.data.success) {
+        return result.data;
+      }
+    } catch (error) {
+      return error;
+    }
+  }, []);
+
   const deleteConversation = async (id: string) => {
     try {
       const result = await api.delete('/chat/conversations', {params: {id}});
@@ -26,7 +38,8 @@ const useChat = () => {
       return error;
     }
   };
-  return {getConversationsList, deleteConversation};
+
+  return {getConversationsList, deleteConversation, getConversationById};
 };
 
 export default useChat;

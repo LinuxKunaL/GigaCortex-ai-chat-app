@@ -7,6 +7,7 @@ const router = Router();
 
 router
   .route("/conversations")
+  .post(chat.getConversationById)
   .get(chat.getConversationsList)
   .delete(chat.deleteConversation);
 

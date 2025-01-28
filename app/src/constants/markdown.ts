@@ -3,12 +3,16 @@ import colors from './colors';
 import globalStyles from '../styles/style';
 import typographyStyles from './typography';
 import spaces from './spaces';
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
 
-const markdownStyle:StyleSheet.NamedStyles<any> = {
+const markdownStyle: StyleSheet.NamedStyles<any> = {
   heading1: {
     ...typographyStyles.h2,
     color: colors.gray100,
+  },
+  Heading2: {
+    ...typographyStyles.h2,
+    color: colors.white,
   },
   heading3: {
     fontFamily: fonts.RubikMedium,

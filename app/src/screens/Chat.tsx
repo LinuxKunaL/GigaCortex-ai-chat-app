@@ -28,14 +28,16 @@ import useSocket from '../hooks/useSocket';
 import markdownStyle from '../constants/markdown';
 import {useSelector} from 'react-redux';
 import {RootState} from '../app/redux';
-
+import useChat from '../hooks/useChat';
+import {ObjectId} from 'bson';
 type Props = defaultProps & {};
 type TConversionObject = {
-  me: string;
-  ai: string[];
+  _id?: string;
+  question: string;
+  answer: string[] | string;
 };
 type TAnswerObject = {
-  questionId: number;
+  questionId: string;
   answerInChunk: string[];
   isCompleted: boolean;
 };
@@ -56,6 +58,7 @@ const Chat: React.FC<Props> = props => {
     useState<string>('New Title');
   const conversionObjectRef = useRef(conversionObject);
   const {stream} = useSocket();
+  const {getConversationById} = useChat();
   const me = useSelector((state: RootState) => state.me);
 
   const renderCodeBlock = (
@@ -90,25 +93,36 @@ const Chat: React.FC<Props> = props => {
   };
 
   const copyResponse = () => {
-    Clipboard.setString(markdownBlocks.join('\n'));
+    // Clipboard.setString(markdownBlocks.join('\n'));
   };
 
   const sendMessage = async () => {
     const userId = me._id;
+    const newId = new ObjectId().toString();
 
+    /**
+     * Here we set the new @conversationObject
+     * for instantly show the new question
+     */
     setConversionObject(prev => {
       return [
         ...prev,
         {
-          me: inputData,
-          ai: [],
+          _id: newId,
+          question: inputData,
+          answer: [],
         },
       ];
     });
 
+    /**
+     * Here we send @conversationId to the server
+     * for put the new questions by this id
+     */
     const data = {
       userId,
       question: {
+        questionId: newId,
         text: inputData,
       },
       conversionId,
@@ -129,16 +143,41 @@ const Chat: React.FC<Props> = props => {
       const {questionId} = data;
       setConversionObject(prev => {
         return prev.map(item =>
-          item.id === questionId
-            ? {...item, ai: [...(item.ai || []), ...(data.answerInChunk || [])]}
+          item._id === questionId
+            ? {
+                ...item,
+                answer: [...(item.answer || []), ...(data.answerInChunk || [])],
+              }
             : item,
         );
       });
     };
     stream.on('receive-answer', handleReceiveAnswer);
+    /**
+     * We get the @conversationId from the server
+     * for put the new questions by this id
+     */
     stream.on('receive-conversation-id', (id: string) => setConversionId(id));
     stream.on('receive-title', (title: string) => setConversationTitle(title));
   }, [stream]);
+
+  useEffect(() => {
+    /**
+     * When we open the conversation from @historyTab
+     * than we get the all conversation by id
+     */
+    if (props.route.params && props.route.params.id) {
+      setConversionId(props.route.params.id);
+      getConversationById(props.route.params.id).then(
+        (res: {success: boolean; data: any}) => {
+          if (res.success) {
+            setConversationTitle(res.data.title);
+            setConversionObject(res.data.conversation);
+          }
+        },
+      );
+    }
+  }, [getConversationById, props.route.params]);
 
   const changeInput = (value: string) => {
     setInputData(value);
@@ -181,14 +220,14 @@ const Chat: React.FC<Props> = props => {
                               typographyStyles.label,
                               styles.senderMessageText,
                             ]}>
-                            {item.me}
+                            {item.question}
                           </Text>
                         </View>
                         <Image style={styles.senderAvatar} srcSet={me.avatar} />
                       </View>
                       <View style={styles.receiver}>
                         <View style={styles.receiverMessageBox}>
-                          {item.ai.length > 0 ? (
+                          {item.answer.length > 0 ? (
                             <View style={styles.receiverMessage}>
                               <Markdown
                                 key={index}
@@ -200,9 +239,12 @@ const Chat: React.FC<Props> = props => {
                                     ),
                                 }}
                                 style={markdownStyle}>
-                                {item.ai?.reduce(
-                                  (acc, curr) => acc + '' + curr,
-                                )}
+                                {Array.isArray(item.answer)
+                                  ? item.answer.reduce(
+                                      (acc, curr) => acc + '' + curr,
+                                      '',
+                                    )
+                                  : item.answer}
                               </Markdown>
                               <IconButton
                                 name="content-copy"

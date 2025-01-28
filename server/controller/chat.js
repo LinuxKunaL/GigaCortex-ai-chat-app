@@ -24,13 +24,34 @@ class Chat {
       });
     }
   }
+  async getConversationById(req, res) {
+    try {
+      const { id } = req.body;
+      const result = await MChat.findById(id);
+      if (!result) {
+        return res.status(404).json({
+          success: false,
+          message: "Conversation not found",
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
   async deleteConversation(req, res) {
     try {
       const { id } = req.query;
       await MChat.findByIdAndDelete(id);
       return res.status(200).json({
         success: true,
-        massage: 'Conversation deleted',
+        massage: "Conversation deleted",
       });
     } catch (error) {
       return res.status(500).json({
