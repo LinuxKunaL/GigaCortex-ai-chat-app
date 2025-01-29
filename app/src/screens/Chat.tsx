@@ -5,6 +5,9 @@ import {
   View,
   ScrollView,
   Keyboard,
+  ActivityIndicator,
+  Alert,
+  ToastAndroid,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import React, {useEffect, useRef, useState} from 'react';
@@ -30,6 +33,7 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../app/redux';
 import useChat from '../hooks/useChat';
 import {ObjectId} from 'bson';
+import codeLabel from '../utils/codingLabel';
 type Props = defaultProps & {};
 type TConversionObject = {
   _id?: string;
@@ -61,45 +65,35 @@ const Chat: React.FC<Props> = props => {
   const {getConversationById} = useChat();
   const me = useSelector((state: RootState) => state.me);
 
-  const renderCodeBlock = (
-    language: string,
-    code: string,
-    returnType?: string,
-  ) => {
-    // const codeLabel = {
-    //   python: 'PY',
-    //   c: 'C',
-    //   java: 'JAVA',
-    //   cpp: 'CPP',
-    //   js: 'JS',
-    //   html: 'HTML',
-    //   css: 'CSS',
-    // };
-    if (returnType === 'forCopy') {
-      return code;
-    } else {
-      return (
-        <View style={styles.codeContainer}>
-          <Text style={styles.codeLabel}>{language.toUpperCase()}</Text>
-          <TouchableOpacityText
-            onPress={() => Clipboard.setString(code)}
-            style={styles.copyButton}>
-            copy code
-          </TouchableOpacityText>
-          <CodeBlock language={language}>{code}</CodeBlock>
-        </View>
-      );
-    }
+  const renderCodeBlock = (language: string, code: string) => {
+    const languageFormat = codeLabel[language.toLowerCase()];
+    return (
+      <View style={styles.codeContainer}>
+        <Text style={styles.codeLabel}>
+          {languageFormat ? languageFormat : language.toUpperCase()}
+        </Text>
+        <TouchableOpacityText
+          onPress={() => Clipboard.setString(code)}
+          style={styles.copyButton}>
+          copy code
+        </TouchableOpacityText>
+        <CodeBlock language={language}>{code}</CodeBlock>
+      </View>
+    );
   };
 
-  const copyResponse = () => {
-    // Clipboard.setString(markdownBlocks.join('\n'));
+  const copyResponse = (id: string) => {
+    const result = conversionObject.find(item => item._id === id)?.answer;
+    Clipboard.setString(result?.toString() as string);
   };
 
   const sendMessage = async () => {
     const userId = me._id;
     const newId = new ObjectId().toString();
 
+    if (inputData.length === 0) {
+      return ToastAndroid.show('Please Enter the Question', ToastAndroid.SHORT);
+    }
     /**
      * Here we set the new @conversationObject
      * for instantly show the new question
@@ -194,7 +188,7 @@ const Chat: React.FC<Props> = props => {
             size="sm"
             iconSize={23}
             color={colors.sulu}
-            onPress={() => props.navigation.navigate('home')}
+            onPress={() => props.navigation.goBack()}
           />
         </View>
         <View style={styles.conversationBox}>
@@ -252,13 +246,15 @@ const Chat: React.FC<Props> = props => {
                                 size="xs"
                                 iconSize={15}
                                 color={colors.sulu}
-                                onPress={copyResponse}
+                                onPress={() => copyResponse(item._id)}
                               />
                             </View>
                           ) : (
-                            <Text style={styles.receiverMessage}>
-                              Loading...
-                            </Text>
+                            <ActivityIndicator
+                              style={styles.alignSelf}
+                              size="small"
+                              color={colors.sulu}
+                            />
                           )}
                         </View>
                         <Icon name="creation" size={20} color={colors.white} />
@@ -355,6 +351,7 @@ const styles = StyleSheet.create({
     overflow: 'scroll',
   },
   width100: {height: '100%'},
+  alignSelf: {alignSelf: 'flex-start'},
   messageInputBox: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -377,17 +374,26 @@ const styles = StyleSheet.create({
   sender: {
     flexDirection: 'row',
     gap: 10,
-    width: '100%',
     justifyContent: 'flex-end',
+    flex: 1,
+    width: '100%',
   },
   senderMessageBox: {
     ...globalStyles.border,
     backgroundColor: colors.gray,
     paddingHorizontal: 10,
+    paddingVertical: 10,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    maxWidth: '80%',
+    flexShrink: 1,
   },
-  senderMessageText: {color: colors.white, width: '100%', textAlign: 'center'},
+  senderMessageText: {
+    color: colors.white,
+    flexWrap: 'wrap',
+    textAlign: 'left',
+    lineHeight: 22,
+  },
   senderAvatar: {width: 40, height: 40},
   receiver: {
     flexDirection: 'row-reverse',
