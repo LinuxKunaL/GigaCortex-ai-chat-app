@@ -1,6 +1,12 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import RawBottomSheet from 'react-native-raw-bottom-sheet';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {RBSheetRef} from '../../types/rbSheetRef';
 import typographyStyles from '../../constants/typography';
 import IconButton from '../interface/IconButton';
@@ -9,6 +15,9 @@ import globalStyles from '../../styles/style';
 import Icon from '../interface/Icon';
 import sizes from '../../constants/sizes';
 import Gap from '../interface/Gap';
+import RazorpayCheckout from 'react-native-razorpay';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../app/redux';
 
 type Props = {
   ref: RBSheetRef;
@@ -22,6 +31,10 @@ type TPricingItem = {
 
 const PurchaseToken = React.forwardRef<RBSheetRef, Props>(
   (props, ref: any): JSX.Element => {
+    const me = useSelector((state: RootState) => state.me);
+
+    useEffect(() => {}, []);
+
     const pricing: TPricingItem[] = [
       {
         id: 1,
@@ -55,6 +68,35 @@ const PurchaseToken = React.forwardRef<RBSheetRef, Props>(
       },
     ];
 
+    var options = {
+      description: 'Credits towards consultation',
+      image: 'https://i.imgur.com/3g7nmJC.jpg',
+      currency: 'INR',
+      key: process.env.RAZORPAY_KEY_ID,
+      amount: 5000,
+      name: 'Purchase Credits',
+      order_id: '',
+      prefill: {
+        email: me.email,
+        contact: '',
+        name: me.name,
+      },
+      theme: {color: colors.sulu},
+    };
+
+    const handlePurchaseCredit = async (id: number) => {
+      const amount = pricing.find(item => item.id === id)?.price;
+      // options.amount = amount * 100;
+      RazorpayCheckout.open(options)
+        .then((data: any) => {
+          console.log(data);
+        })
+        .catch((error: any) => {
+          console.log(error);
+          ToastAndroid.show('Error: ' + error, ToastAndroid.LONG);
+        });
+    };
+
     return (
       <RawBottomSheet
         ref={ref}
@@ -70,7 +112,7 @@ const PurchaseToken = React.forwardRef<RBSheetRef, Props>(
           <View style={styles.bottomSheetTitleView}>
             <View style={styles.titleView}>
               <Text style={[typographyStyles.title, {color: colors.white}]}>
-                Purchase Token
+                Purchase Credit
               </Text>
             </View>
             <IconButton
@@ -88,6 +130,7 @@ const PurchaseToken = React.forwardRef<RBSheetRef, Props>(
               <TouchableOpacity
                 key={item.id}
                 activeOpacity={0.7}
+                onPress={() => handlePurchaseCredit(item.id)}
                 style={styles.tokenView}>
                 <View style={styles.tokenTextsView}>
                   <Icon
