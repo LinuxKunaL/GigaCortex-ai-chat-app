@@ -57,16 +57,12 @@ class Chat {
 
         if (chunkContent) {
           tempResult.push(chunkContent);
-
-          // Emit chunked response to the client
+          console.log(chunkContent);
           socket.emit("receive-answer", {
             questionId: question.questionId,
             answerInChunk: chunkContent,
             isCompleted,
           });
-
-          // Simulate delay for demo purposes
-          // await new Promise((resolve) => setTimeout(resolve, 400));
         }
       }
 
@@ -89,6 +85,7 @@ class Chat {
         );
       }
     } catch (error) {
+      socket.emit("error-in-ask-question", error.message);
       print(`Gemini Error: ${error.message}`, "red");
     }
   }

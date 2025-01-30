@@ -34,6 +34,7 @@ import {RootState} from '../app/redux';
 import useChat from '../hooks/useChat';
 import {ObjectId} from 'bson';
 import codeLabel from '../utils/codingLabel';
+
 type Props = defaultProps & {};
 type TConversionObject = {
   _id?: string;
@@ -133,24 +134,30 @@ const Chat: React.FC<Props> = props => {
   }, [conversionObject]);
 
   useEffect(() => {
+    if (!stream) return;
+
     const handleReceiveAnswer = (data: TAnswerObject) => {
       const {questionId} = data;
-      setConversionObject(prev => {
-        return prev.map(item =>
+      setConversionObject(prev =>
+        prev.map(item =>
           item._id === questionId
             ? {
                 ...item,
                 answer: [...(item.answer || []), ...(data.answerInChunk || [])],
               }
             : item,
-        );
-      });
+        ),
+      );
     };
+
+    const handleError = (error: string) => {
+      ToastAndroid.show('Error: ' + error, ToastAndroid.LONG);
+      setConversionObject([]);
+      ToastAndroid.show('Try Again', ToastAndroid.SHORT);
+    };
+
     stream.on('receive-answer', handleReceiveAnswer);
-    /**
-     * We get the @conversationId from the server
-     * for put the new questions by this id
-     */
+    stream.on('error-in-ask-question', handleError);
     stream.on('receive-conversation-id', (id: string) => setConversionId(id));
     stream.on('receive-title', (title: string) => setConversationTitle(title));
   }, [stream]);
@@ -246,7 +253,7 @@ const Chat: React.FC<Props> = props => {
                                 size="xs"
                                 iconSize={15}
                                 color={colors.sulu}
-                                onPress={() => copyResponse(item._id)}
+                                onPress={() => copyResponse(item._id as string)}
                               />
                             </View>
                           ) : (

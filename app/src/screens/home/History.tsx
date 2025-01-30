@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ToastAndroid,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 import sizes from '../../constants/sizes';
 import fonts from '../../constants/fonts';
@@ -20,6 +21,7 @@ import React, {Fragment, useEffect, useState} from 'react';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import defaultProps from '../../types/props';
+import {ScrollView} from 'react-native';
 
 type Props = defaultProps & {};
 
@@ -123,11 +125,24 @@ const History: React.FC<Props> = props => {
             </View>
             <Gap height={5} />
             <Text style={[typographyStyles.subtitle, {color: colors.gray300}]}>
-              {item.description}
+              {item.description}...
             </Text>
           </TouchableOpacity>
         </Swipeable>
       </View>
+    );
+  };
+  const refreshView = (): JSX.Element => {
+    return (
+      <RefreshControl
+        colors={[colors.sulu]}
+        progressBackgroundColor={colors.gray500}
+        refreshing={false}
+        onRefresh={() => setRefreshList(refreshList + 1)}
+        style={{
+          backgroundColor: colors.sulu,
+        }}
+      />
     );
   };
 
@@ -135,9 +150,10 @@ const History: React.FC<Props> = props => {
     <View style={globalStyles.container}>
       <View style={styles.layout}>
         {conversationsList.length > 0 && (
-          <GestureHandlerRootView style={{...globalStyles.debugBorder}}>
+          <GestureHandlerRootView>
             <FlatList
               data={conversationsList}
+              refreshControl={refreshView()}
               keyExtractor={item => item._id.toString()}
               renderItem={renderItem}
               ItemSeparatorComponent={ItemSeparator}
