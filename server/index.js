@@ -5,6 +5,7 @@ import cors from "cors";
 import print from "./utils/console.js";
 import authRouter from "./router/auth.js";
 import chatRouter from "./router/chat.js";
+import creditRouter from "./router/credit.js";
 import { connectDB } from "./database/connect.js";
 import verify from "./middleware/verify.js";
 import compression from "compression";
@@ -26,6 +27,7 @@ app.use(verify);
 
 app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/credit", creditRouter);
 
 // when route & endpoint not found
 app.use("*", (req, res) => {

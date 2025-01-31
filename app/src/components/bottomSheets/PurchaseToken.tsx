@@ -6,7 +6,7 @@ import {
   View,
 } from 'react-native';
 import RawBottomSheet from 'react-native-raw-bottom-sheet';
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {RBSheetRef} from '../../types/rbSheetRef';
 import typographyStyles from '../../constants/typography';
 import IconButton from '../interface/IconButton';
@@ -15,16 +15,21 @@ import globalStyles from '../../styles/style';
 import Icon from '../interface/Icon';
 import sizes from '../../constants/sizes';
 import Gap from '../interface/Gap';
-import RazorpayCheckout from 'react-native-razorpay';
+import RazorpayCheckout, {
+  CheckoutOptions,
+  SuccessResponse,
+} from 'react-native-razorpay';
+import RNRestart from 'react-native-restart';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../app/redux';
+import useCredit from '../../hooks/useCredit';
 
 type Props = {
   ref: RBSheetRef;
 };
 type TPricingItem = {
   id: number;
-  token: number;
+  credit: number;
   price: number;
   isPopular: boolean;
 };
@@ -32,49 +37,15 @@ type TPricingItem = {
 const PurchaseToken = React.forwardRef<RBSheetRef, Props>(
   (props, ref: any): JSX.Element => {
     const me = useSelector((state: RootState) => state.me);
-
-    useEffect(() => {}, []);
-
-    const pricing: TPricingItem[] = [
-      {
-        id: 1,
-        token: 1999,
-        price: 29,
-        isPopular: false,
-      },
-      {
-        id: 2,
-        token: 4999,
-        price: 69,
-        isPopular: true,
-      },
-      {
-        id: 3,
-        token: 9999,
-        price: 129,
-        isPopular: true,
-      },
-      {
-        id: 4,
-        token: 2999,
-        price: 39,
-        isPopular: false,
-      },
-      {
-        id: 5,
-        token: 7999,
-        price: 99,
-        isPopular: true,
-      },
-    ];
-
-    var options = {
+    const [pricing, setPricing] = useState<TPricingItem[]>([]);
+    const {getCreditPricing, getOrder, paymentCredit} = useCredit();
+    var options: CheckoutOptions = {
       description: 'Credits towards consultation',
       image: 'https://i.imgur.com/3g7nmJC.jpg',
       currency: 'INR',
-      key: process.env.RAZORPAY_KEY_ID,
-      amount: 5000,
+      key: process.env.RAZORPAY_KEY_ID as string,
       name: 'Purchase Credits',
+      amount: 0,
       order_id: '',
       prefill: {
         email: me.email,
@@ -83,13 +54,33 @@ const PurchaseToken = React.forwardRef<RBSheetRef, Props>(
       },
       theme: {color: colors.sulu},
     };
+    const fetchPricing = useCallback(async () => {
+      const result = await getCreditPricing();
+      setPricing(result);
+    }, [getCreditPricing]);
+
+    useEffect(() => {
+      fetchPricing();
+    }, [fetchPricing]);
 
     const handlePurchaseCredit = async (id: number) => {
-      const amount = pricing.find(item => item.id === id)?.price;
-      // options.amount = amount * 100;
+      const result = await getOrder(id);
+
+      options.amount = result.amount;
+      options.order_id = result.id;
+
       RazorpayCheckout.open(options)
-        .then((data: any) => {
-          console.log(data);
+        .then(async (pay: SuccessResponse) => {
+          const data = {
+            paymentId: pay.razorpay_payment_id,
+            orderId: pay.razorpay_order_id,
+            creditId: id,
+            _id: result._id,
+          };
+          const res = await paymentCredit(data);
+          ToastAndroid.show(res.message, ToastAndroid.SHORT);
+          ref.current?.close();
+          RNRestart.restart();
         })
         .catch((error: any) => {
           console.log(error);
@@ -139,7 +130,7 @@ const PurchaseToken = React.forwardRef<RBSheetRef, Props>(
                     color={colors.sulu}
                   />
                   <Text style={[typographyStyles.title, {color: colors.white}]}>
-                    {item.token} <Text style={styles.tokenText}>Tokens</Text>
+                    {item.credit} <Text style={styles.tokenText}>Credits</Text>
                   </Text>
                   <Text>
                     {item.isPopular && (

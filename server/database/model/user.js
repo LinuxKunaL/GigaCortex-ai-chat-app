@@ -19,23 +19,7 @@ const userSchema = new Schema({
     balance: {
       type: Number,
       default: 1000,
-    },
-    transactionHistory: [
-      {
-        date: {
-          type: String,
-        },
-        credit: {
-          type: Number,
-        },
-        amount: {
-          type: Number,
-        },
-        paymentId: {
-          type: String,
-        },
-      },
-    ],
+    }
   },
   password: {
     type: String,
