@@ -19,7 +19,7 @@ const userSchema = new Schema({
     balance: {
       type: Number,
       default: 1000,
-    }
+    },
   },
   password: {
     type: String,
@@ -62,6 +62,18 @@ userSchema.methods.generateToken = async function () {
     return jwt.sign({ _id: this._id }, config.jwt);
   } catch (error) {
     throw error;
+  }
+};
+
+userSchema.methods.reduceCredit = async function (token) {
+  try {
+    if (this.credits.balance < token) {
+      throw new Error("Not enough credits");
+    }
+    this.credits.balance -= token;
+    return await this.save();
+  } catch (error) {
+   throw error
   }
 };
 

@@ -1,6 +1,6 @@
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import RawBottomSheet from 'react-native-raw-bottom-sheet';
-import React from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {RBSheetRef} from '../../types/rbSheetRef';
 import typographyStyles from '../../constants/typography';
 import IconButton from '../interface/IconButton';
@@ -9,6 +9,7 @@ import globalStyles from '../../styles/style';
 import sizes from '../../constants/sizes';
 import Gap from '../interface/Gap';
 import fonts from '../../constants/fonts';
+import useCredit from '../../hooks/useCredit';
 
 type Props = {
   ref: RBSheetRef;
@@ -19,9 +20,32 @@ type Props = {
     paymentId: string;
   }[];
 };
+type TPurchaseHistory = {
+  credits: number;
+  amount: number;
+  razorpayId: string;
+  createdAt: Date;
+  paymentStatus: string;
+};
 
 const PurchaseHistory = React.forwardRef<RBSheetRef, Props>(
   (props, ref: any): JSX.Element => {
+    const {getPurchasedHistory} = useCredit();
+    const [purchaseHistory, setPurchaseHistory] = useState<TPurchaseHistory[]>(
+      [],
+    );
+
+    const fetching = useCallback(async () => {
+      const result = await getPurchasedHistory();
+      setPurchaseHistory(result);
+    }, [getPurchasedHistory]);
+
+    useEffect(() => {
+      fetching();
+    }, [fetching]);
+
+    console.log(purchaseHistory);
+
     return (
       <RawBottomSheet
         ref={ref}
@@ -52,13 +76,13 @@ const PurchaseHistory = React.forwardRef<RBSheetRef, Props>(
           <Gap height={15} />
           <ScrollView>
             <View style={{gap: sizes.xs}}>
-              {props.transactionHistory.map((item, index) => (
+              {purchaseHistory.map((item, index) => (
                 <View style={styles.itemView} key={index}>
                   <View style={styles.itemInnerView}>
                     <View style={styles.tokenOrTotal}>
                       <Text style={styles.itemText}>
                         Credit :{' '}
-                        <Text style={styles.itemSubtext}>{item.credit}</Text>
+                        <Text style={styles.itemSubtext}>{item.credits}</Text>
                       </Text>
                       <Text style={styles.itemText}>
                         Total :{' '}
@@ -67,15 +91,19 @@ const PurchaseHistory = React.forwardRef<RBSheetRef, Props>(
                     </View>
                     <Text style={styles.itemText}>
                       Payment id :
-                      <Text style={styles.itemSubtext}>{item.paymentId}</Text>
+                      <Text style={styles.itemSubtext}> {item.razorpayId}</Text>
                     </Text>
                     <Text style={styles.itemText}>
-                      Date :<Text style={styles.itemSubtext}>{item.date}</Text>
+                      Date :
+                      <Text style={styles.itemSubtext}>
+                        {' '}
+                        {new Date(item.createdAt as any).toDateString()}
+                      </Text>
                     </Text>
                   </View>
                 </View>
               ))}
-              {props.transactionHistory.length === 0 && (
+              {purchaseHistory.length === 0 && (
                 <Text style={{...styles.itemText, color: colors.gray100}}>
                   No transaction history
                 </Text>
@@ -110,6 +138,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
+    position: 'relative',
+    overflow: 'hidden',
   },
   itemInnerView: {
     gap: sizes.xs - 4,
@@ -124,5 +154,5 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontFamily: fonts.RubikRegular,
   },
-  itemSubtext: {color: colors.sulu, fontSize: sizes.sm},
+  itemSubtext: {color: colors.sulu, fontSize: sizes.sm - 1},
 });

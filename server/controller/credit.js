@@ -30,7 +30,7 @@ class credit {
     razorpayClient.orders.create(options, async function (err, order) {
       if (order) {
         const result = await MPayment.create({
-          userId: req.user,
+          user: req.user,
           razorpayOrderId: order.id,
           amount: price,
           credits: credit,
@@ -70,6 +70,22 @@ class credit {
       });
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  async getPurchasedHistory(req, res) {
+    try {
+      const userId = req.user;
+      const result = await MPayment.find({ user: userId });
+      return res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
     }
   }
 }

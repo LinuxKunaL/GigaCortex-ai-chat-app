@@ -3,6 +3,7 @@ import config from "../config/index.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import print from "../utils/console.js";
 import MChat from "../database/model/chat.js";
+import MUser from "../database/model/user.js";
 
 class Chat {
   async ollamaChat(res, message) {
@@ -39,15 +40,19 @@ class Chat {
       const genAI = new GoogleGenerativeAI(config.GeminiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const chat = await model.startChat();
+      const token = 2;
+
+      const user = await MUser.findById(userId);
+      await user.reduceCredit(token);
 
       const result = await chat.sendMessageStream(
         `Respond to the following message in markdown format. Here's the message: ${question.text}`
       );
 
-      let tempResult = [];
-      let isCompleted = false;
       let title = "";
+      let tempResult = [];
       let description = "";
+      let isCompleted = false;
 
       print("Gemini model started", "blue");
 
@@ -86,7 +91,7 @@ class Chat {
       }
     } catch (error) {
       socket.emit("error-in-ask-question", error.message);
-      print(`Gemini Error: ${error.message}`, "red");
+      print(`Error: ${error.message}`, "red");
     }
   }
 

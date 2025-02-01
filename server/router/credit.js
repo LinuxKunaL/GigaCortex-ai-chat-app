@@ -7,5 +7,6 @@ const credit = new Credit();
 router.route("/pricing").get(credit.creditPricing);
 router.route("/order").post(credit.order);
 router.route("/payment").post(credit.payment);
+router.route("/history").get(credit.getPurchasedHistory);
 
 export default router;

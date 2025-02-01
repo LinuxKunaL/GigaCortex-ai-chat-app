@@ -32,7 +32,17 @@ const useCredit = () => {
       return error;
     }
   }, []);
-  return {getCreditPricing, getOrder, paymentCredit};
+  const getPurchasedHistory = useCallback(async () => {
+    try {
+      const result = await api.get('/credit/history');
+      if (result.data.success) {
+        return result.data.data;
+      }
+    } catch (error) {
+      return error;
+    }
+  }, []);
+  return {getCreditPricing, getOrder, paymentCredit, getPurchasedHistory};
 };
 
 export default useCredit;

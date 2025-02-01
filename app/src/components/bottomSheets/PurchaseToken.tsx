@@ -1,28 +1,28 @@
 import {
-  StyleSheet,
+  View,
   Text,
+  StyleSheet,
   ToastAndroid,
   TouchableOpacity,
-  View,
 } from 'react-native';
-import RawBottomSheet from 'react-native-raw-bottom-sheet';
-import React, {useCallback, useEffect, useState} from 'react';
+import Gap from '../interface/Gap';
+import Icon from '../interface/Icon';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../app/redux';
+import sizes from '../../constants/sizes';
+import colors from '../../constants/colors';
+import RNRestart from 'react-native-restart';
+import useCredit from '../../hooks/useCredit';
+import globalStyles from '../../styles/style';
+import IconButton from '../interface/IconButton';
 import {RBSheetRef} from '../../types/rbSheetRef';
 import typographyStyles from '../../constants/typography';
-import IconButton from '../interface/IconButton';
-import colors from '../../constants/colors';
-import globalStyles from '../../styles/style';
-import Icon from '../interface/Icon';
-import sizes from '../../constants/sizes';
-import Gap from '../interface/Gap';
+import RawBottomSheet from 'react-native-raw-bottom-sheet';
+import React, {useCallback, useEffect, useState} from 'react';
 import RazorpayCheckout, {
   CheckoutOptions,
   SuccessResponse,
 } from 'react-native-razorpay';
-import RNRestart from 'react-native-restart';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../app/redux';
-import useCredit from '../../hooks/useCredit';
 
 type Props = {
   ref: RBSheetRef;
@@ -54,6 +54,7 @@ const PurchaseToken = React.forwardRef<RBSheetRef, Props>(
       },
       theme: {color: colors.sulu},
     };
+
     const fetchPricing = useCallback(async () => {
       const result = await getCreditPricing();
       setPricing(result);

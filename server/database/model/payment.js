@@ -21,6 +21,10 @@ const paymentSchema = new Schema({
   paymentStatus: {
     type: String,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const MPayment = model("payments", paymentSchema);
