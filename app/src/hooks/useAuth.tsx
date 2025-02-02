@@ -5,6 +5,7 @@ import RNRestart from 'react-native-restart';
 import {useDispatch} from 'react-redux';
 import {setMe} from '../app/redux';
 import {AxiosError} from 'axios';
+import {useCallback} from 'react';
 
 function useAuth() {
   const {setItem} = useAsyncStorage();
@@ -51,7 +52,7 @@ function useAuth() {
    * isAuthenticated also set a user data in @redux
    * @returns {Promise<boolean>}
    */
-  const isAuthenticated = async (): Promise<boolean> => {
+  const isAuthenticated = useCallback(async (): Promise<boolean> => {
     try {
       const me = await api.post('/auth/me');
       if (me?.data?.success) {
@@ -62,7 +63,7 @@ function useAuth() {
     } catch (error) {
       return false;
     }
-  };
+  }, [dispatch]);
 
   return {register, login, isAuthenticated, logout};
 }

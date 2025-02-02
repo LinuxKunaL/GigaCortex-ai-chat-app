@@ -10,7 +10,7 @@ import {
   ToastAndroid,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import globalStyles from '../styles/style';
 import typographyStyles from '../constants/typography';
 import sizes from '../constants/sizes';
@@ -29,8 +29,8 @@ import defaultProps from '../types/props';
 import Markdown from 'react-native-markdown-display';
 import useSocket from '../hooks/useSocket';
 import markdownStyle from '../constants/markdown';
-import {useSelector} from 'react-redux';
-import {RootState} from '../app/redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {RootState, setRefreshKey} from '../app/redux';
 import useChat from '../hooks/useChat';
 import {ObjectId} from 'bson';
 import codeLabel from '../utils/codingLabel';
@@ -65,6 +65,8 @@ const Chat: React.FC<Props> = props => {
   const {stream} = useSocket();
   const {getConversationById} = useChat();
   const me = useSelector((state: RootState) => state.me);
+  const [isInteract, setIsInteract] = useState(false);
+  const dispatch = useDispatch();
 
   const renderCodeBlock = (language: string, code: string) => {
     const languageFormat = codeLabel[language.toLowerCase()];
@@ -134,7 +136,9 @@ const Chat: React.FC<Props> = props => {
   }, [conversionObject]);
 
   useEffect(() => {
-    if (!stream) return;
+    if (!stream) {
+      return;
+    }
 
     const handleReceiveAnswer = (data: TAnswerObject) => {
       const {questionId} = data;
@@ -148,6 +152,9 @@ const Chat: React.FC<Props> = props => {
             : item,
         ),
       );
+      if (data.isCompleted) {
+        !isInteract && setIsInteract(true);
+      }
     };
 
     const handleError = (error: string) => {
@@ -160,7 +167,13 @@ const Chat: React.FC<Props> = props => {
     stream.on('error-in-ask-question', handleError);
     stream.on('receive-conversation-id', (id: string) => setConversionId(id));
     stream.on('receive-title', (title: string) => setConversationTitle(title));
-  }, [stream]);
+  }, [isInteract, stream]);
+
+  const onScreenClose = useCallback(() => {
+    if (isInteract) {
+      dispatch(setRefreshKey());
+    }
+  }, [dispatch, isInteract]);
 
   useEffect(() => {
     /**
@@ -178,7 +191,17 @@ const Chat: React.FC<Props> = props => {
         },
       );
     }
-  }, [getConversationById, props.route.params]);
+    /**
+     * When we close the screen or go back the screen
+     * than we reFetch the @credits
+     */
+    props.navigation.addListener('beforeRemove', onScreenClose);
+  }, [
+    getConversationById,
+    props.route.params,
+    props.navigation,
+    onScreenClose,
+  ]);
 
   const changeInput = (value: string) => {
     setInputData(value);

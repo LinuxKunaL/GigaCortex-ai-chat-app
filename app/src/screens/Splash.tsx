@@ -7,12 +7,15 @@ import Logo from '../assets/svg/Logo';
 import colors from '../constants/colors';
 import WebPattern from '../assets/svg/WebPattern';
 import useAuth from '../hooks/useAuth';
+import {useSelector} from 'react-redux';
+import {RootState} from '../app/redux';
 
 type Props = defaultProps & {};
 
 const Splash: React.FC<Props> = props => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.6)).current;
+  const refreshKay = useSelector((state: RootState) => state.refreshToken);
   const {isAuthenticated} = useAuth();
 
   useEffect(() => {
@@ -42,6 +45,12 @@ const Splash: React.FC<Props> = props => {
       clearTimeout(nativeTimeout);
     };
   }, [fadeAnim, scaleAnim, props.navigation, isAuthenticated]);
+
+  useEffect(() => {
+    if (refreshKay !== 0) {
+      isAuthenticated();
+    }
+  }, [isAuthenticated, refreshKay]);
 
   return (
     <View style={globalStyles.container}>

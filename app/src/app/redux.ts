@@ -12,10 +12,21 @@ const meSlice = createSlice({
   },
 });
 
+const refreshKeySlice = createSlice({
+  name: 'refreshKey',
+  initialState: 0,
+  reducers: {
+    setRefreshKey(state) {
+      return state + 1;
+    },
+  },
+});
+
 // here is a code for redux store
 const store = configureStore({
   reducer: {
     me: meSlice.reducer,
+    refreshToken: refreshKeySlice.reducer,
   },
 });
 
@@ -23,4 +34,6 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 const {setMe} = meSlice.actions;
-export {store, setMe};
+const {setRefreshKey} = refreshKeySlice.actions;
+
+export {store, setMe, setRefreshKey};

@@ -44,8 +44,6 @@ const PurchaseHistory = React.forwardRef<RBSheetRef, Props>(
       fetching();
     }, [fetching]);
 
-    console.log(purchaseHistory);
-
     return (
       <RawBottomSheet
         ref={ref}
