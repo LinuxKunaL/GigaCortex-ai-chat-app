@@ -17,8 +17,6 @@ class chatRouter {
     const chatController = new ChatController();
     chatController.conversation(this.socket, data);
   }
-
-
 }
 
 export default chatRouter;

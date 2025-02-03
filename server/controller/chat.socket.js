@@ -6,48 +6,98 @@ import MChat from "../database/model/chat.js";
 import MUser from "../database/model/user.js";
 
 class Chat {
-  async ollamaChat(res, message) {
+  async ollamaChat(socket, question, userId, conversionId) {
     try {
       const streamResponse = await Ollama.chat({
         model: config.ollamaModels.llama3,
         messages: [
           {
             role: "user",
-            content: message,
+            content: question.text,
           },
         ],
         stream: true,
       });
 
+      const token = 2; // Assuming the same token cost as Gemini
+      const user = await MUser.findById(userId);
+      await user.reduceCredit(token);
+
+      let title = "";
+      let tempResult = [];
+      let description = "";
+      let isCompleted = false;
+
       print("Ollama model started", "gray");
 
       for await (const chunk of streamResponse) {
-        const message = chunk.message.content;
-        res.write(message);
-        res.flush();
+        const chunkContent = chunk.message.content;
+        isCompleted = chunk.done; // Assuming 'done' indicates the end of the stream
+
+        if (chunkContent) {
+          tempResult.push(chunkContent);
+          console.log(chunkContent);
+          socket.emit("receive-answer", {
+            questionId: question.questionId,
+            answerInChunk: chunkContent,
+            isCompleted,
+          });
+        }
+      }
+
+      if (!conversionId) {
+        title = await this.generateTitle(streamResponse, question.text);
+        description = tempResult.join(" ").replace(/\n/g, "").slice(0, 35);
       }
 
       print("Ollama model ended", "gray");
-      res.end();
+
+      if (isCompleted) {
+        await this.saveConversation(
+          socket,
+          conversionId,
+          userId,
+          title,
+          description,
+          question,
+          tempResult
+        );
+      }
     } catch (error) {
+      console.log(error);
+      socket.emit("error-in-ask-question", error.message);
       print(`Ollama Error: ${error.message}`, "red");
-      res.status(500).send("Error in Ollama chat.");
     }
   }
 
   async geminiChat(socket, question, userId, conversionId) {
+    console.log(question);
+
     try {
       const genAI = new GoogleGenerativeAI(config.GeminiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const chat = await model.startChat();
       const token = 2;
-
+      var result;
       const user = await MUser.findById(userId);
       await user.reduceCredit(token);
 
-      const result = await chat.sendMessageStream(
-        `Respond to the following message in markdown format. Here's the message: ${question.text}`
-      );
+      if (question.image) {
+        result = await model.generateContentStream([
+          {
+            inlineData: {
+              data: Buffer.from(question.image).toString("base64"),
+              mimeType: "image/jpeg",
+            },
+          },
+          question.text,
+        ]);
+      }
+      if (!question.image) {
+        result = await chat.sendMessageStream(
+          `Respond to the following message in markdown format. Here's the message: ${question.text}`
+        );
+      }
 
       let title = "";
       let tempResult = [];
@@ -90,6 +140,8 @@ class Chat {
         );
       }
     } catch (error) {
+      console.log(error);
+
       socket.emit("error-in-ask-question", error.message);
       print(`Error: ${error.message}`, "red");
     }
@@ -104,7 +156,7 @@ class Chat {
       }
 
       if (chatModel === "ollama") {
-        await this.ollamaChat(socket, question);
+        await this.ollamaChat(socket, question, userId, conversionId);
       }
     } catch (error) {
       print(`Conversation Error: ${error.message}`, "red");

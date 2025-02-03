@@ -1,14 +1,14 @@
-import {Animated, Easing, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useRef} from 'react';
-import typography from '../constants/typography';
+import Logo from '../assets/svg/Logo';
+import useAuth from '../hooks/useAuth';
+import {RootState} from '../app/redux';
+import {useSelector} from 'react-redux';
+import colors from '../constants/colors';
 import defaultProps from '../types/props';
 import globalStyles from '../styles/style';
-import Logo from '../assets/svg/Logo';
-import colors from '../constants/colors';
+import React, {useEffect, useRef} from 'react';
+import typography from '../constants/typography';
 import WebPattern from '../assets/svg/WebPattern';
-import useAuth from '../hooks/useAuth';
-import {useSelector} from 'react-redux';
-import {RootState} from '../app/redux';
+import {Animated, Easing, StyleSheet, Text, View} from 'react-native';
 
 type Props = defaultProps & {};
 

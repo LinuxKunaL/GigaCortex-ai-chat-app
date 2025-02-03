@@ -34,11 +34,24 @@ import {RootState, setRefreshKey} from '../app/redux';
 import useChat from '../hooks/useChat';
 import {ObjectId} from 'bson';
 import codeLabel from '../utils/codingLabel';
+import {launchImageLibrary} from 'react-native-image-picker';
+import spaces from '../constants/spaces';
+import {base64ToArrayBuffer} from '../utils/base64ToArrayBuffer';
 
 type Props = defaultProps & {};
+type TInputData = {
+  text: string;
+  image: {
+    url: string;
+    arrayBuffer: any;
+  };
+};
 type TConversionObject = {
   _id?: string;
-  question: string;
+  question: {
+    text?: string;
+    image: string;
+  };
   answer: string[] | string;
 };
 type TAnswerObject = {
@@ -46,9 +59,10 @@ type TAnswerObject = {
   answerInChunk: string[];
   isCompleted: boolean;
 };
+
 type TInputMessageBox = {
   setHeight: (height: number) => void;
-  changeInput: (value: string) => void;
+  setInputData: (update: (state: TInputData) => TInputData) => void;
   inputValue: string;
   sendButton: () => void;
 };
@@ -58,7 +72,7 @@ const Chat: React.FC<Props> = props => {
     [],
   );
   const [conversionId, setConversionId] = useState<string>('');
-  const [inputData, setInputData] = useState('');
+  const [inputData, setInputData] = useState<TInputData>();
   const [conversationTitle, setConversationTitle] =
     useState<string>('New Title');
   const conversionObjectRef = useRef(conversionObject);
@@ -93,42 +107,59 @@ const Chat: React.FC<Props> = props => {
   const sendMessage = async () => {
     const userId = me._id;
     const newId = new ObjectId().toString();
+    try {
+      if (inputData?.text.length === 0) {
+        return ToastAndroid.show(
+          'Please Enter the Question',
+          ToastAndroid.SHORT,
+        );
+      }
+      /**
+       * Here we set the new @conversationObject
+       * for instantly show the new question
+       */
 
-    if (inputData.length === 0) {
-      return ToastAndroid.show('Please Enter the Question', ToastAndroid.SHORT);
-    }
-    /**
-     * Here we set the new @conversationObject
-     * for instantly show the new question
-     */
-    setConversionObject(prev => {
-      return [
-        ...prev,
-        {
-          _id: newId,
-          question: inputData,
-          answer: [],
+      setConversionObject((prev: any) => {
+        return [
+          ...prev,
+          {
+            _id: newId,
+            question: {
+              text: inputData?.text ?? '',
+              image: inputData?.image?.url,
+            },
+            answer: [],
+          },
+        ];
+      });
+
+      /**
+       * Here we send @conversationId to the server
+       * for put the new questions by this id
+       */
+      const data = {
+        userId,
+        question: {
+          questionId: newId,
+          text: inputData?.text,
+          image: inputData?.image?.arrayBuffer,
         },
-      ];
-    });
+        conversionId,
+        chatModel: 'ollama',
+      };
 
-    /**
-     * Here we send @conversationId to the server
-     * for put the new questions by this id
-     */
-    const data = {
-      userId,
-      question: {
-        questionId: newId,
-        text: inputData,
-      },
-      conversionId,
-      chatModel: 'gemini',
-    };
+      stream.emit('ask-question', data);
 
-    stream.emit('ask-question', data);
-
-    setInputData('');
+      setInputData({
+        image: {
+          url: '',
+          arrayBuffer: null,
+        },
+        text: '',
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -203,10 +234,6 @@ const Chat: React.FC<Props> = props => {
     onScreenClose,
   ]);
 
-  const changeInput = (value: string) => {
-    setInputData(value);
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.innerLayout}>
@@ -239,12 +266,24 @@ const Chat: React.FC<Props> = props => {
                     <React.Fragment key={index}>
                       <View style={styles.sender}>
                         <View style={styles.senderMessageBox}>
+                          {item.question.image && (
+                            <View
+                              style={[
+                                styles.inputImageView,
+                                styles.senderImageView,
+                              ]}>
+                              <Image
+                                style={styles.inputImage}
+                                srcSet={item.question.image}
+                              />
+                            </View>
+                          )}
                           <Text
                             style={[
                               typographyStyles.label,
                               styles.senderMessageText,
                             ]}>
-                            {item.question}
+                            {item.question.text}
                           </Text>
                         </View>
                         <Image style={styles.senderAvatar} srcSet={me.avatar} />
@@ -298,8 +337,8 @@ const Chat: React.FC<Props> = props => {
         </View>
         <InputMessageBox
           sendButton={sendMessage}
-          changeInput={changeInput}
-          inputValue={inputData}
+          setInputData={setInputData}
+          inputValue={inputData?.text as string}
           setHeight={setInputViewHeight}
         />
       </View>
@@ -320,31 +359,78 @@ const HowCanIHelpYou = () => {
 };
 
 const InputMessageBox = (props: TInputMessageBox) => {
+  const [image, setImage] = useState<string>('');
+  const handleAddImage = () => {
+    launchImageLibrary({mediaType: 'photo', includeBase64: true}, async res => {
+      const arrayBuffer = await base64ToArrayBuffer(
+        res.assets[0]?.base64 as string,
+      );
+      setImage(res.assets[0]?.uri as string);
+      props.setInputData(prev => ({
+        ...prev,
+        image: {
+          arrayBuffer,
+          url: res.assets[0]?.uri as string,
+        },
+      }));
+    });
+  };
+  const handleCloseImage = () => {
+    setImage('');
+    props.setInputData(prev => ({
+      ...prev,
+      image: {
+        url: '',
+        arrayBuffer: null,
+      },
+    }));
+  };
   return (
     <View
       onLayout={event => props.setHeight(event.nativeEvent.layout.height + 30)}
       style={styles.messageInputBox}>
       <IconButton
+        onPress={handleAddImage}
         name="image"
         variant="secondary"
         size="lg"
         iconSize={24}
         color={colors.sulu}
       />
-      <TextInput
-        multiline
-        numberOfLines={10}
-        textAlignVertical="center"
-        placeholder="Ask your question......"
-        selectionColor={colors.gray300}
-        placeholderTextColor={colors.white}
-        cursorColor={colors.sulu}
-        style={styles.input}
-        defaultValue={props.inputValue}
-        onChange={e => {
-          props.changeInput(e.nativeEvent.text);
-        }}
-      />
+      <View style={styles.inputView}>
+        {image && (
+          <View style={styles.inputImageView}>
+            <Image style={styles.inputImage} srcSet={image} />
+            <IconButton
+              size="xs"
+              name="close"
+              iconSize={19}
+              variant="secondary"
+              color={colors.sulu}
+              onPress={handleCloseImage}
+              style={styles.inputImageClose}
+            />
+          </View>
+        )}
+        <TextInput
+          multiline
+          numberOfLines={10}
+          textAlignVertical="center"
+          placeholder="Ask your question......"
+          selectionColor={colors.gray300}
+          placeholderTextColor={colors.white}
+          cursorColor={colors.sulu}
+          style={styles.input}
+          defaultValue={props.inputValue}
+          onChange={e => {
+            const value = e.nativeEvent.text;
+            props.setInputData(pre => ({
+              ...pre,
+              text: value,
+            }));
+          }}
+        />
+      </View>
       <IconButton
         name="send"
         variant="primary"
@@ -354,6 +440,7 @@ const InputMessageBox = (props: TInputMessageBox) => {
         onPress={() => {
           props.sendButton();
           Keyboard.dismiss();
+          setImage('');
         }}
       />
     </View>
@@ -424,6 +511,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     lineHeight: 22,
   },
+  senderImageView: {marginTop: 0, marginBottom: 10},
   senderAvatar: {width: 40, height: 40},
   receiver: {
     flexDirection: 'row-reverse',
@@ -444,16 +532,31 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 10,
   },
-  input: {
+  inputView: {
     ...globalStyles.border,
     backgroundColor: colors.gray,
     paddingHorizontal: 10,
+    flex: 1,
+    width: '100%',
+  },
+  input: {
     fontFamily: fonts.RubikRegular,
     includeFontPadding: false,
     height: '100%',
     flex: 1,
     color: colors.white,
   },
+  inputImageView: {
+    width: 130,
+    height: 130,
+    marginTop: 10,
+  },
+  inputImage: {
+    height: '100%',
+    width: '100%',
+    borderRadius: spaces.radius,
+  },
+  inputImageClose: {position: 'absolute', right: 4, top: 4},
   h2Text: {
     ...typographyStyles.h2,
     color: colors.gray100,
