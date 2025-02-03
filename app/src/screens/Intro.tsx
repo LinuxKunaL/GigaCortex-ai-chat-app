@@ -1,5 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import defaultProps from '../types/props';
 import globalStyles from '../styles/style';
 import RobotWithCredit from '../assets/svg/RobotWithCredit';
@@ -15,7 +15,10 @@ type Props = defaultProps & {};
 
 const Intro: React.FC<Props> = props => {
   const [introIndex, setIntroIndex] = useState(0);
-  AsyncStorage.setItem('chatModel', 'ollama');
+
+  useEffect(() => {
+    AsyncStorage.setItem('chatModel', 'ollama');
+  }, []);
 
   const content = [
     {

@@ -1,8 +1,8 @@
 import {
   Image,
-  Modal,
   StyleSheet,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -35,20 +35,26 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     AsyncStorage.getItem('chatModel').then(res => {
-      setChatModel(res as string);
+      if (res === 'ollama') {
+        setChatModel('ollama - llama3.1');
+      }
+      if (res === 'gemini') {
+        setChatModel('gemini - 1.5 pro');
+      }
     });
   }, []);
 
   const handleChangeModel = async () => {
     const model = await AsyncStorage.getItem('chatModel');
     if (model === 'ollama') {
-      setChatModel('gemini');
+      setChatModel('gemini - 1.5 pro');
       await AsyncStorage.setItem('chatModel', 'gemini');
     }
     if (model === 'gemini') {
-      setChatModel('ollama');
+      setChatModel('ollama - llama3.1');
       await AsyncStorage.setItem('chatModel', 'ollama');
     }
+    ToastAndroid.show('Model Changed', ToastAndroid.SHORT);
   };
 
   const options = [
@@ -147,7 +153,11 @@ const Profile: React.FC = () => {
               </View>
               <Text style={styles.optionTitle}>Change Chat Model</Text>
             </View>
-            <Text style={{...typographyStyles.label, color: colors.gray500}}>
+            <Text
+              style={{
+                ...typographyStyles.label,
+                color: colors.gray300,
+              }}>
               {chatModel}
             </Text>
           </TouchableOpacity>

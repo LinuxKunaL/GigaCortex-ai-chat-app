@@ -19,7 +19,7 @@ class Chat {
         stream: true,
       });
 
-      const token = 2; // Assuming the same token cost as Gemini
+      const token = 2
       const user = await MUser.findById(userId);
       await user.reduceCredit(token);
 
@@ -32,7 +32,7 @@ class Chat {
 
       for await (const chunk of streamResponse) {
         const chunkContent = chunk.message.content;
-        isCompleted = chunk.done; // Assuming 'done' indicates the end of the stream
+        isCompleted = chunk.done;
 
         if (chunkContent) {
           tempResult.push(chunkContent);
