@@ -24,6 +24,10 @@ const chatSchema = new Schema({
       },
     },
   ],
+  model: {
+    type: String,
+    enum: ["ollama", "gemini"],
+  },
   updateAt: {
     type: Date,
     default: Date.now,

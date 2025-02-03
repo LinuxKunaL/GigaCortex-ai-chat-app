@@ -46,7 +46,7 @@ class Chat {
       }
 
       if (!conversionId) {
-        title = await this.generateTitle(streamResponse, question.text);
+        title = await this.generateTitle(null, question.text, "ollama");
         description = tempResult.join(" ").replace(/\n/g, "").slice(0, 35);
       }
 
@@ -60,7 +60,8 @@ class Chat {
           title,
           description,
           question,
-          tempResult
+          tempResult,
+          "ollama"
         );
       }
     } catch (error) {
@@ -71,8 +72,6 @@ class Chat {
   }
 
   async geminiChat(socket, question, userId, conversionId) {
-    console.log(question);
-
     try {
       const genAI = new GoogleGenerativeAI(config.GeminiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -122,7 +121,7 @@ class Chat {
       }
 
       if (!conversionId) {
-        title = await this.generateTitle(chat, question);
+        title = await this.generateTitle(chat, question, "gemini");
         description = tempResult.join(" ").replace(/\n/g, "").slice(0, 35);
       }
 
@@ -136,12 +135,12 @@ class Chat {
           title,
           description,
           question,
-          tempResult
+          tempResult,
+          "gemini"
         );
       }
     } catch (error) {
       console.log(error);
-
       socket.emit("error-in-ask-question", error.message);
       print(`Error: ${error.message}`, "red");
     }
@@ -163,19 +162,33 @@ class Chat {
     }
   }
 
-  async generateTitle(chat, question) {
+  async generateTitle(chat, question, model) {
     try {
       let title = "";
+      if (model === "gemini") {
+        const result = await chat.sendMessageStream(
+          `Generate a straightforward and meaningful title with only 4 to 5 words that directly reflects the main idea of the following message. Avoid adding extra punctuation, symbols, or questions. Do not include anything other than the title itself. Here's the message: ${question.text}`
+        );
 
-      const result = await chat.sendMessageStream(
-        `Generate a straightforward and meaningful title with only 4 to 5 words that directly reflects the main idea of the following message. Avoid adding extra punctuation, symbols, or questions. Do not include anything other than the title itself. Here's the message: ${question.text}`
-      );
-
-      for await (const chunk of result.stream) {
-        const chunkContent = chunk.text();
-        title += chunkContent.replace(/\n/g, " ");
+        for await (const chunk of result.stream) {
+          const chunkContent = chunk.text();
+          title += chunkContent.replace(/\n/g, " ");
+        }
       }
-
+      if (model === "ollama") {
+        const response = await Ollama.chat({
+          model: config.ollamaModels.llama3,
+          messages: [
+            {
+              role: "user",
+              content: `Generate a straightforward and meaningful title with few words that directly reflects the main idea of the following message. Avoid adding extra punctuation, symbols, or questions. Do not include anything other than the title itself. Here's the message: '${question}' , give the title that describes given message in 2,3 words.`,
+            },
+          ],
+        });
+        if (response.done) {
+          title = response.message.content;
+        }
+      }
       return title;
     } catch (error) {
       print(`Title Generation Error: ${error.message}`, "red");
@@ -190,7 +203,8 @@ class Chat {
     title,
     description,
     question,
-    tempResult
+    tempResult,
+    chatModel
   ) {
     try {
       const conversation =
@@ -208,6 +222,7 @@ class Chat {
               answer: tempResult.join(""),
             },
           ],
+          model: chatModel,
         });
 
         socket.emit("receive-title", title);

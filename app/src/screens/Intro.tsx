@@ -9,11 +9,13 @@ import colors from '../constants/colors';
 import Gap from '../components/interface/Gap';
 import RobotWithLaptop from '../assets/svg/RobotWithLaptop';
 import RobotWithOllama from '../assets/svg/RobotWithOllama';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = defaultProps & {};
 
 const Intro: React.FC<Props> = props => {
   const [introIndex, setIntroIndex] = useState(0);
+  AsyncStorage.setItem('chatModel', 'ollama');
 
   const content = [
     {

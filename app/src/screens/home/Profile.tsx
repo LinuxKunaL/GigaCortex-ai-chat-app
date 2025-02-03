@@ -1,5 +1,12 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import {
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import globalStyles from '../../styles/style';
 import typographyStyles from '../../constants/typography';
 import colors from '../../constants/colors';
@@ -16,6 +23,7 @@ import ChangePassword from '../../components/bottomSheets/ChangePassword';
 import TermsAndPolicy from '../../components/bottomSheets/TermsAndPrivacy';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../app/redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Profile: React.FC = () => {
   const REFPurchaseToken = React.useRef<RBSheetRef>(null);
@@ -23,31 +31,50 @@ const Profile: React.FC = () => {
   const REFChangePassword = React.useRef<RBSheetRef>(null);
   const REFTermsAndPolicy = React.useRef<RBSheetRef>(null);
   const me = useSelector((state: RootState) => state.me);
+  const [chatModel, setChatModel] = useState<string>();
+
+  useEffect(() => {
+    AsyncStorage.getItem('chatModel').then(res => {
+      setChatModel(res as string);
+    });
+  }, []);
+
+  const handleChangeModel = async () => {
+    const model = await AsyncStorage.getItem('chatModel');
+    if (model === 'ollama') {
+      setChatModel('gemini');
+      await AsyncStorage.setItem('chatModel', 'gemini');
+    }
+    if (model === 'gemini') {
+      setChatModel('ollama');
+      await AsyncStorage.setItem('chatModel', 'ollama');
+    }
+  };
 
   const options = [
     {
-      id: 1,
+      id: 2,
       title: 'Privacy policy',
       icon: 'security',
       color: colors.gray500,
       onPress: () => REFTermsAndPolicy.current?.open(),
     },
     {
-      id: 2,
+      id: 3,
       title: 'Term of service',
       icon: 'text-box-outline',
       color: colors.gray500,
       onPress: () => REFTermsAndPolicy.current?.open(),
     },
     {
-      id: 3,
+      id: 4,
       title: 'Clear all chat',
       icon: 'notification-clear-all',
       color: colors.red,
       onPress: () => {},
     },
     {
-      id: 4,
+      id: 5,
       title: 'logout',
       icon: 'logout',
       color: colors.red,
@@ -110,6 +137,20 @@ const Profile: React.FC = () => {
         <HorizontalLine height={0.3} width={200} />
         <Gap height={sizes.xs} />
         <View style={styles.optionView}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.optionBox}
+            onPress={handleChangeModel}>
+            <View style={styles.optionLeft}>
+              <View style={styles.optionIcon}>
+                <Icon name="chat-processing" color={colors.gray500} size={28} />
+              </View>
+              <Text style={styles.optionTitle}>Change Chat Model</Text>
+            </View>
+            <Text style={{...typographyStyles.label, color: colors.gray500}}>
+              {chatModel}
+            </Text>
+          </TouchableOpacity>
           {options.map(item => (
             <TouchableOpacity
               key={item.id}
@@ -122,7 +163,7 @@ const Profile: React.FC = () => {
                 </View>
                 <Text style={styles.optionTitle}>{item.title}</Text>
               </View>
-              {item.id <= 2 && (
+              {item.id > 1 && item.id < 4 && (
                 <Icon name="chevron-right" color={colors.sulu} size={25} />
               )}
             </TouchableOpacity>

@@ -6,7 +6,6 @@ import {
   ScrollView,
   Keyboard,
   ActivityIndicator,
-  Alert,
   ToastAndroid,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -37,6 +36,7 @@ import codeLabel from '../utils/codingLabel';
 import {launchImageLibrary} from 'react-native-image-picker';
 import spaces from '../constants/spaces';
 import {base64ToArrayBuffer} from '../utils/base64ToArrayBuffer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = defaultProps & {};
 type TInputData = {
@@ -75,6 +75,7 @@ const Chat: React.FC<Props> = props => {
   const [inputData, setInputData] = useState<TInputData>();
   const [conversationTitle, setConversationTitle] =
     useState<string>('New Title');
+  const [chatModel, setChatModel] = useState<string>('ollama');
   const conversionObjectRef = useRef(conversionObject);
   const {stream} = useSocket();
   const {getConversationById} = useChat();
@@ -145,7 +146,7 @@ const Chat: React.FC<Props> = props => {
           image: inputData?.image?.arrayBuffer,
         },
         conversionId,
-        chatModel: 'ollama',
+        chatModel,
       };
 
       stream.emit('ask-question', data);
@@ -227,6 +228,10 @@ const Chat: React.FC<Props> = props => {
      * than we reFetch the @credits
      */
     props.navigation.addListener('beforeRemove', onScreenClose);
+
+    AsyncStorage.getItem('chatModel').then(res => {
+      setChatModel(res as string);
+    });
   }, [
     getConversationById,
     props.route.params,
@@ -283,7 +288,9 @@ const Chat: React.FC<Props> = props => {
                               typographyStyles.label,
                               styles.senderMessageText,
                             ]}>
-                            {item.question.text}
+                            {typeof item.question === 'string'
+                              ? item.question
+                              : item.question.text}
                           </Text>
                         </View>
                         <Image style={styles.senderAvatar} srcSet={me.avatar} />
