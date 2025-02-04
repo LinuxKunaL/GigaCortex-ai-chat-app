@@ -1,4 +1,4 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, ToastAndroid, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import defaultProps from '../types/props';
 import globalStyles from '../styles/style';
@@ -83,6 +83,7 @@ const Login: React.FC<Props> = props => {
             variant="secondary"
             fontSize="md"
             size="lg"
+            onPress={() => ToastAndroid.show('Coming soon', ToastAndroid.SHORT)}
             style={styles.googleButtonView}>
             <View style={styles.googleButtonInner}>
               <GoogleLogo />

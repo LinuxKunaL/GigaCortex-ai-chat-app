@@ -48,6 +48,14 @@ class Chat {
   async deleteConversation(req, res) {
     try {
       const { id } = req.query;
+      if (!id) {
+        await MChat.deleteMany();
+        return res.status(200).json({
+          success: true,
+          massage: "All Conversations deleted",
+        });
+      }
+
       await MChat.findByIdAndDelete(id);
       return res.status(200).json({
         success: true,

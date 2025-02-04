@@ -62,7 +62,7 @@ type TAnswerObject = {
 
 type TInputMessageBox = {
   setHeight: (height: number) => void;
-  setInputData: (update: (state: TInputData) => TInputData) => void;
+  setInputData: (update: (state: any) => TInputData) => void;
   inputValue: string;
   sendButton: () => void;
 };
@@ -82,6 +82,7 @@ const Chat: React.FC<Props> = props => {
   const me = useSelector((state: RootState) => state.me);
   const [isInteract, setIsInteract] = useState(false);
   const dispatch = useDispatch();
+  const REFScrollView = React.useRef<ScrollView>(null);
 
   const renderCodeBlock = (language: string, code: string) => {
     const languageFormat = codeLabel[language.toLowerCase()];
@@ -102,18 +103,34 @@ const Chat: React.FC<Props> = props => {
 
   const copyResponse = (id: string) => {
     const result = conversionObject.find(item => item._id === id)?.answer;
-    Clipboard.setString(result?.toString() as string);
+    Clipboard.setString(result?.toString().replaceAll(',', '') as string);
   };
 
   const sendMessage = async () => {
     const userId = me._id;
     const newId = new ObjectId().toString();
+    REFScrollView.current?.scrollToEnd({animated: true});
     try {
       if (inputData?.text.length === 0) {
         return ToastAndroid.show(
           'Please Enter the Question',
           ToastAndroid.SHORT,
         );
+      }
+      if (chatModel === 'ollama') {
+        if (inputData?.image.url) {
+          setInputData({
+            image: {
+              url: '',
+              arrayBuffer: null,
+            },
+            text: '',
+          });
+          return ToastAndroid.show(
+            'Image is not supported in Ollama use gemini',
+            ToastAndroid.SHORT,
+          );
+        }
       }
       /**
        * Here we set the new @conversationObject
@@ -179,11 +196,17 @@ const Chat: React.FC<Props> = props => {
           item._id === questionId
             ? {
                 ...item,
-                answer: [...(item.answer || []), ...(data.answerInChunk || [])],
+                answer: [
+                  ...(item.answer || []),
+                  ...(Array.isArray(data.answerInChunk)
+                    ? [data.answerInChunk.join('')]
+                    : [data.answerInChunk]),
+                ],
               }
             : item,
         ),
       );
+      REFScrollView.current?.scrollToEnd({animated: true});
       if (data.isCompleted) {
         !isInteract && setIsInteract(true);
       }
@@ -260,7 +283,8 @@ const Chat: React.FC<Props> = props => {
             <View style={styles.width100}>
               <ScrollView
                 style={styles.flex1}
-                showsVerticalScrollIndicator={false}>
+                showsVerticalScrollIndicator={false}
+                ref={REFScrollView}>
                 <Gap height={30} />
                 <View
                   style={{
@@ -271,7 +295,7 @@ const Chat: React.FC<Props> = props => {
                     <React.Fragment key={index}>
                       <View style={styles.sender}>
                         <View style={styles.senderMessageBox}>
-                          {item.question.image && (
+                          {item.question?.image && (
                             <View
                               style={[
                                 styles.inputImageView,
@@ -369,15 +393,16 @@ const InputMessageBox = (props: TInputMessageBox) => {
   const [image, setImage] = useState<string>('');
   const handleAddImage = () => {
     launchImageLibrary({mediaType: 'photo', includeBase64: true}, async res => {
+      const selectedImage = res.assets?.[0];
       const arrayBuffer = await base64ToArrayBuffer(
-        res.assets[0]?.base64 as string,
+        selectedImage?.base64 as string,
       );
-      setImage(res.assets[0]?.uri as string);
+      setImage(selectedImage?.uri as string);
       props.setInputData(prev => ({
         ...prev,
         image: {
           arrayBuffer,
-          url: res.assets[0]?.uri as string,
+          url: selectedImage?.uri as string,
         },
       }));
     });

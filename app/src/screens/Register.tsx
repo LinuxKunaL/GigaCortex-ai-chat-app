@@ -113,6 +113,7 @@ const Register: React.FC<Props> = props => {
             variant="secondary"
             fontSize="md"
             size="lg"
+            onPress={() => ToastAndroid.show('Coming soon', ToastAndroid.SHORT)}
             style={styles.googleButtonView}>
             <View style={styles.googleButtonInner}>
               <GoogleLogo />

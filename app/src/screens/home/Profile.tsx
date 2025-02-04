@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   StyleSheet,
   Text,
@@ -24,6 +25,8 @@ import TermsAndPolicy from '../../components/bottomSheets/TermsAndPrivacy';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../app/redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import useChat from '../../hooks/useChat';
+import RNRestart from 'react-native-restart';
 
 const Profile: React.FC = () => {
   const REFPurchaseToken = React.useRef<RBSheetRef>(null);
@@ -32,6 +35,7 @@ const Profile: React.FC = () => {
   const REFTermsAndPolicy = React.useRef<RBSheetRef>(null);
   const me = useSelector((state: RootState) => state.me);
   const [chatModel, setChatModel] = useState<string>();
+  const {clearAllChat} = useChat();
 
   useEffect(() => {
     AsyncStorage.getItem('chatModel').then(res => {
@@ -57,6 +61,43 @@ const Profile: React.FC = () => {
     ToastAndroid.show('Model Changed', ToastAndroid.SHORT);
   };
 
+  const handleClearAllChat = async () => {
+    try {
+      const result = await clearAllChat();
+      if (result.success) {
+        ToastAndroid.show(
+          (result.massage as string) || 'All Chat Cleared',
+          ToastAndroid.SHORT,
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      ToastAndroid.show('Failed to clear all chat', ToastAndroid.SHORT);
+      return error;
+    }
+  };
+
+  const handleShowAlertDialog = () => {
+    Alert.alert(
+      '',
+      'Are you sure you want to clear all chat?',
+      [
+        {text: 'Yes', onPress: () => handleClearAllChat()},
+        {text: 'No', onPress: () => {}, style: 'cancel'},
+      ],
+      {cancelable: false},
+    );
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('token');
+      ToastAndroid.show('Logout Successfully', ToastAndroid.SHORT);
+      RNRestart.restart();
+    } catch (error) {
+      ToastAndroid.show('Failed to logout', ToastAndroid.SHORT);
+    }
+  };
   const options = [
     {
       id: 2,
@@ -77,14 +118,14 @@ const Profile: React.FC = () => {
       title: 'Clear all chat',
       icon: 'notification-clear-all',
       color: colors.red,
-      onPress: () => {},
+      onPress: () => handleShowAlertDialog(),
     },
     {
       id: 5,
       title: 'logout',
       icon: 'logout',
       color: colors.red,
-      onPress: () => {},
+      onPress: () => handleLogout(),
     },
   ];
 

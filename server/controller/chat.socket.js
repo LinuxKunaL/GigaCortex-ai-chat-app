@@ -19,7 +19,7 @@ class Chat {
         stream: true,
       });
 
-      const token = 2
+      const token = 2;
       const user = await MUser.findById(userId);
       await user.reduceCredit(token);
 
@@ -33,16 +33,12 @@ class Chat {
       for await (const chunk of streamResponse) {
         const chunkContent = chunk.message.content;
         isCompleted = chunk.done;
-
-        if (chunkContent) {
-          tempResult.push(chunkContent);
-          console.log(chunkContent);
-          socket.emit("receive-answer", {
-            questionId: question.questionId,
-            answerInChunk: chunkContent,
-            isCompleted,
-          });
-        }
+        tempResult.push(chunkContent);
+        socket.emit("receive-answer", {
+          questionId: question.questionId,
+          answerInChunk: chunkContent,
+          isCompleted,
+        });
       }
 
       if (!conversionId) {
@@ -109,15 +105,13 @@ class Chat {
         const chunkContent = chunk.text();
         isCompleted = chunk.candidates[0]?.finishReason === "STOP";
 
-        if (chunkContent) {
-          tempResult.push(chunkContent);
-          console.log(chunkContent);
-          socket.emit("receive-answer", {
-            questionId: question.questionId,
-            answerInChunk: chunkContent,
-            isCompleted,
-          });
-        }
+        tempResult.push(chunkContent);
+
+        socket.emit("receive-answer", {
+          questionId: question.questionId,
+          answerInChunk: chunkContent,
+          isCompleted,
+        });
       }
 
       if (!conversionId) {
@@ -209,7 +203,6 @@ class Chat {
     try {
       const conversation =
         (conversionId && (await MChat.findById(conversionId))) || null;
-
       // Create a new conversation if not found
       if (!conversation) {
         const result = await MChat.create({

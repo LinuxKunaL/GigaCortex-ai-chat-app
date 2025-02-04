@@ -22,6 +22,7 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import defaultProps from '../../types/props';
 import {ScrollView} from 'react-native';
+import IconButton from '../../components/interface/IconButton';
 
 type Props = defaultProps & {};
 
@@ -149,7 +150,7 @@ const History: React.FC<Props> = props => {
   return (
     <View style={globalStyles.container}>
       <View style={styles.layout}>
-        {conversationsList.length > 0 && (
+        {conversationsList?.length > 0 && (
           <GestureHandlerRootView>
             <FlatList
               data={conversationsList}
@@ -163,13 +164,22 @@ const History: React.FC<Props> = props => {
             />
           </GestureHandlerRootView>
         )}
-        {conversationsList.length === 0 && (
+        {conversationsList?.length === 0 && (
           <View style={styles.noConversation}>
             <Icon name="history" size={40} color={colors.sulu} />
             <Gap height={sizes.xs} />
             <Text style={[typographyStyles.label, {color: colors.gray100}]}>
               No conversations yet
             </Text>
+            <Gap height={sizes.xs} />
+            <IconButton
+              name="reload"
+              variant="secondary"
+              size="md"
+              iconSize={21}
+              color={colors.sulu}
+              onPress={() => setRefreshList(refreshList + 1)}
+            />
           </View>
         )}
       </View>

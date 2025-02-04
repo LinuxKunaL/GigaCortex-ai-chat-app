@@ -39,7 +39,23 @@ const useChat = () => {
     }
   };
 
-  return {getConversationsList, deleteConversation, getConversationById};
+  const clearAllChat = async () => {
+    try {
+      const result = await api.delete('/chat/conversations');
+      if (result.data.success) {
+        return result.data;
+      }
+    } catch (error) {
+      return error;
+    }
+  };
+
+  return {
+    getConversationsList,
+    deleteConversation,
+    getConversationById,
+    clearAllChat,
+  };
 };
 
 export default useChat;

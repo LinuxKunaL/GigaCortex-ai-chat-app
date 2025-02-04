@@ -10,13 +10,18 @@ const markdownStyle: StyleSheet.NamedStyles<any> = {
     ...typographyStyles.h2,
     color: colors.gray100,
   },
-  Heading2: {
+  heading2: {
     ...typographyStyles.h2,
     color: colors.white,
   },
   heading3: {
     fontFamily: fonts.RubikMedium,
     color: colors.white,
+  },
+  heading4: {
+    fontFamily: fonts.RubikMedium,
+    color: colors.white,
+    fontSize: 16,
   },
   body: {
     gap: 7,
