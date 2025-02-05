@@ -37,13 +37,14 @@ A full-stack application built with **React Native** (frontend) and **Node.js** 
 
 ## Screenshots
 
-![Alt text](.photos/splash.png)
-![Alt text](.photos/intro.png)
-![Alt text](.photos/home.png)
-![Alt text](.photos/chat.png)
-![Alt text](.photos/history.png)
-![Alt text](.photos/profile.png)
-![Alt text](.photos/credit.png)
+<img src=".photos/splash.png" alt="Alt text" height="500">
+<img src=".photos/intro.png" alt="Alt text" height="500">
+<img src=".photos/home.png" alt="Alt text" height="500">
+<img src=".photos/chat.png" alt="Alt text" height="500">
+<img src=".photos/history.png" alt="Alt text" height="500">
+<img src=".photos/profile.png" alt="Alt text" height="500">
+<img src=".photos/credit.png" alt="Alt text" height="500">
+
 
 ---
 
