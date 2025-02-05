@@ -9,7 +9,7 @@ class Chat {
   async ollamaChat(socket, question, userId, conversionId) {
     try {
       const streamResponse = await Ollama.chat({
-        model: config.ollamaModels.qwen,
+        model: config.ollamaModels.llama3,
         messages: [
           {
             role: "user",

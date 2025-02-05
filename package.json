@@ -7,7 +7,9 @@
     "start:app": "cd app && npm run start",
     "start:monitor-mobile": "scrcpy",
     "start:app:reset": "cd app && npm run start -- --reset-cache",
-    "install:all": "cd app && npm install && cd ../server && npm install"
+    "install:all": "cd app && npm install && cd ../server && npm install",
+    "build:install": "cd app/android && ./gradlew assembleRelease && adb install app/build/outputs/apk/release/app-release.apk && adb shell monkey -p com.gigacortex -c android.intent.category.LAUNCHER 1"
+
   },
   "author": "kunal lokhande",
   "license": "ISC"
