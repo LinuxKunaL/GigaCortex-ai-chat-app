@@ -65,6 +65,7 @@ type TInputMessageBox = {
   setInputData: (update: (state: any) => TInputData) => void;
   inputValue: string;
   sendButton: () => void;
+  isDisable: boolean;
 };
 const Chat: React.FC<Props> = props => {
   const [inputViewHeight, setInputViewHeight] = useState(0);
@@ -72,7 +73,13 @@ const Chat: React.FC<Props> = props => {
     [],
   );
   const [conversionId, setConversionId] = useState<string>('');
-  const [inputData, setInputData] = useState<TInputData>();
+  const [inputData, setInputData] = useState<TInputData>({
+    text: '',
+    image: {
+      url: '',
+      arrayBuffer: null,
+    },
+  });
   const [conversationTitle, setConversationTitle] =
     useState<string>('New Title');
   const [chatModel, setChatModel] = useState<string>('ollama');
@@ -83,6 +90,7 @@ const Chat: React.FC<Props> = props => {
   const [isInteract, setIsInteract] = useState(false);
   const dispatch = useDispatch();
   const REFScrollView = React.useRef<ScrollView>(null);
+  const [isDisable, setIsDisable] = useState<boolean>(false);
 
   const renderCodeBlock = (language: string, code: string) => {
     const languageFormat = codeLabel[language.toLowerCase()];
@@ -132,6 +140,7 @@ const Chat: React.FC<Props> = props => {
           );
         }
       }
+      setIsDisable(true);
       /**
        * Here we set the new @conversationObject
        * for instantly show the new question
@@ -209,6 +218,7 @@ const Chat: React.FC<Props> = props => {
       REFScrollView.current?.scrollToEnd({animated: true});
       if (data.isCompleted) {
         !isInteract && setIsInteract(true);
+        setIsDisable(false);
       }
     };
 
@@ -367,10 +377,11 @@ const Chat: React.FC<Props> = props => {
           )}
         </View>
         <InputMessageBox
+          isDisable={isDisable}
           sendButton={sendMessage}
           setInputData={setInputData}
-          inputValue={inputData?.text as string}
           setHeight={setInputViewHeight}
+          inputValue={inputData?.text as string}
         />
       </View>
     </View>
@@ -427,6 +438,7 @@ const InputMessageBox = (props: TInputMessageBox) => {
         variant="secondary"
         size="lg"
         iconSize={24}
+        disabled={props.isDisable}
         color={colors.sulu}
       />
       <View style={styles.inputView}>
@@ -469,6 +481,7 @@ const InputMessageBox = (props: TInputMessageBox) => {
         size="lg"
         iconSize={24}
         color={colors.gray}
+        disabled={props.isDisable}
         onPress={() => {
           props.sendButton();
           Keyboard.dismiss();

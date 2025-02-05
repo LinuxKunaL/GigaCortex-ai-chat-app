@@ -14,6 +14,7 @@ type Props = {
   color?: string;
   fill?: boolean;
   iconSize?: number;
+  disabled?: boolean;
 };
 
 const IconButton: React.FC<Props> = ({
@@ -22,6 +23,7 @@ const IconButton: React.FC<Props> = ({
   fill = false,
   color,
   onPress,
+  disabled,
   variant,
   iconSize,
   size = 'sm',
@@ -81,13 +83,20 @@ const IconButton: React.FC<Props> = ({
       height: 47,
     },
   };
-
+  const isDisableStyle = disabled && {opacity: 0.5};
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={handlePress}
+      disabled={disabled}
       onLongPress={handleLongPress}
-      style={[styles.button, variantStyle[variant], sizeStyle[size], style]}>
+      style={[
+        style,
+        styles.button,
+        isDisableStyle,
+        sizeStyle[size],
+        variantStyle[variant],
+      ]}>
       <MaterialCommunityIcons
         name={`${name}${fill ? '-outline' : ''}`}
         size={iconSize}
