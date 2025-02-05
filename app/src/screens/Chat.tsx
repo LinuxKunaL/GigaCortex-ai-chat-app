@@ -226,6 +226,7 @@ const Chat: React.FC<Props> = props => {
       ToastAndroid.show('Error: ' + error, ToastAndroid.LONG);
       setConversionObject([]);
       ToastAndroid.show('Try Again', ToastAndroid.SHORT);
+      setIsDisable(false);
     };
 
     stream.on('receive-answer', handleReceiveAnswer);

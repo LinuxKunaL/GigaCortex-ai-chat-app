@@ -9,7 +9,7 @@ class Chat {
   async ollamaChat(socket, question, userId, conversionId) {
     try {
       const streamResponse = await Ollama.chat({
-        model: config.ollamaModels.llama3,
+        model: config.ollamaModels.qwen,
         messages: [
           {
             role: "user",
@@ -61,9 +61,14 @@ class Chat {
         );
       }
     } catch (error) {
-      console.log(error);
-      socket.emit("error-in-ask-question", error.message);
       print(`Ollama Error: ${error.message}`, "red");
+      if (error.message.includes("not found")) {
+        return socket.emit(
+          "error-in-ask-question",
+          "Ollama : model not found , Switch to gemini"
+        );
+      }
+      socket.emit("error-in-ask-question", error.message);
     }
   }
 
