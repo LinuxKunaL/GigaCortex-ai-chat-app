@@ -36,7 +36,7 @@ A full-stack application built with **React Native** (frontend) and **Node.js** 
 ---
 
 ## Screenshots
-
+<div style="display:flex;flex-wrap:wrap">
 <img src=".photos/splash.png" alt="Alt text" height="500">
 <img src=".photos/intro.png" alt="Alt text" height="500">
 <img src=".photos/home.png" alt="Alt text" height="500">
@@ -44,7 +44,7 @@ A full-stack application built with **React Native** (frontend) and **Node.js** 
 <img src=".photos/history.png" alt="Alt text" height="500">
 <img src=".photos/profile.png" alt="Alt text" height="500">
 <img src=".photos/credit.png" alt="Alt text" height="500">
-
+</div>
 
 ---
 
