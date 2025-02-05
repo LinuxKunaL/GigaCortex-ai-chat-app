@@ -42,42 +42,83 @@ const TermsAndPolicy = React.forwardRef<RBSheetRef, Props>(
           />
         </View>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {[1, 2, 3, 4].map(i => (
-            <View key={i}>
-              <Text style={[typographyStyles.title, styles.titleOfContent]}>
-                Clausl 12 ds asdaasdhfjj
-              </Text>
-              <Text style={[typographyStyles.label, styles.paragraph]}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-              </Text>
-            </View>
-          ))}
+          {/* Terms of Service Section */}
+          <Text style={[typographyStyles.title, {color: colors.white}]}>
+            Terms of Service
+          </Text>
+
+          <View>
+            <Text style={[typographyStyles.title, styles.titleOfContent]}>
+              1. User Responsibilities
+            </Text>
+            <Text style={[typographyStyles.label, styles.paragraph]}>
+              By using GigaCortex, you agree not to misuse the AI services,
+              engage in illegal activities, or violate any applicable laws. The
+              app reserves the right to suspend accounts that breach these
+              terms.
+            </Text>
+          </View>
+
+          <View>
+            <Text style={[typographyStyles.title, styles.titleOfContent]}>
+              2. Credit System
+            </Text>
+            <Text style={[typographyStyles.label, styles.paragraph]}>
+              GigaCortex operates on a credit-based system for AI interactions.
+              Users must purchase or spend credits to conversion with AI .
+            </Text>
+          </View>
+
+          <View>
+            <Text style={[typographyStyles.title, styles.titleOfContent]}>
+              3. Authentication & Account Security
+            </Text>
+            <Text style={[typographyStyles.label, styles.paragraph]}>
+              User authentication is required to access GigaCortex. Your account
+              information is securely stored and encrypted. You are responsible
+              for maintaining the confidentiality of your credentials.
+            </Text>
+          </View>
+
           <Gap height={sizes.sm} />
+
+          {/* Privacy Policy Section */}
           <Text style={[typographyStyles.title, {color: colors.white}]}>
             Privacy Policy
           </Text>
-          {[1, 2, 3, 4].map(i => (
-            <View key={i}>
-              <Text style={[typographyStyles.title, styles.titleOfContent]}>
-                Clausl 12 ds asdaasdhfjj
-              </Text>
-              <Text style={[typographyStyles.label, styles.paragraph]}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-              </Text>
-            </View>
-          ))}
+
+          <View>
+            <Text style={[typographyStyles.title, styles.titleOfContent]}>
+              1. User & AI Chat Data Privacy
+            </Text>
+            <Text style={[typographyStyles.label, styles.paragraph]}>
+              GigaCortex stores chat interactions to improve AI responses. Your
+              data is encrypted and not shared with third parties without
+              consent, except as required by law.
+            </Text>
+          </View>
+
+          <View>
+            <Text style={[typographyStyles.title, styles.titleOfContent]}>
+              2. Data Collection & Usage
+            </Text>
+            <Text style={[typographyStyles.label, styles.paragraph]}>
+              We collect minimal user data necessary for account authentication,
+              AI interaction improvements, and credit transactions. Your
+              personal data will never be sold or used for advertising.
+            </Text>
+          </View>
+
+          <View>
+            <Text style={[typographyStyles.title, styles.titleOfContent]}>
+              3. Payment & Financial Data Security
+            </Text>
+            <Text style={[typographyStyles.label, styles.paragraph]}>
+              Payment transactions for credit purchases are securely processed
+              via third-party gateways. GigaCortex does not store your financial
+              details.
+            </Text>
+          </View>
         </ScrollView>
       </RawBottomSheet>
     );
