@@ -4,7 +4,11 @@ AI Chat **Android / IOS** App
 
 ## Demo APK
 
-Demo Apk file : [Download](https://github.com/LinuxKunaL/GigaCortex-ai-chat-app/raw/refs/heads/main/download/GigaCortex.apk)
+Demo Apk file : [Download](https://github.com/LinuxKunaL/GigaCortex-ai-chat-app/raw/refs/heads/main/download/GigaCortexDemo.apk)
+
+## Real / working APK
+
+Working Apk file : [Download](https://github.com/LinuxKunaL/GigaCortex-ai-chat-app/raw/refs/heads/main/download/GigaCortexMain.apk)
 
 ## Overview
 

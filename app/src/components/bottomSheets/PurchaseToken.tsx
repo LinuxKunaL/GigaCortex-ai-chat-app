@@ -41,7 +41,7 @@ const PurchaseToken = React.forwardRef<RBSheetRef, Props>(
     const {getCreditPricing, getOrder, paymentCredit} = useCredit();
     var options: CheckoutOptions = {
       description: 'Credits towards consultation',
-      image: 'https://i.imgur.com/3g7nmJC.jpg',
+      image: 'https://i.postimg.cc/DzDnRzbS/App-logo.png',
       currency: 'INR',
       key: process.env.RAZORPAY_KEY_ID as string,
       name: 'Purchase Credits',
@@ -49,7 +49,7 @@ const PurchaseToken = React.forwardRef<RBSheetRef, Props>(
       order_id: '',
       prefill: {
         email: me.email,
-        contact: '',
+        contact: '9999999999',
         name: me.name,
       },
       theme: {color: colors.sulu},

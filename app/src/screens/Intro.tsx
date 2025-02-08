@@ -17,7 +17,7 @@ const Intro: React.FC<Props> = props => {
   const [introIndex, setIntroIndex] = useState(0);
 
   useEffect(() => {
-    AsyncStorage.setItem('chatModel', 'ollama');
+    AsyncStorage.setItem('chatModel', 'gemini');
   }, []);
 
   const content = [
